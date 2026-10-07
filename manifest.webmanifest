@@ -1,0 +1,13 @@
+{
+  "name": "QazBox — доставка в Казахстан",
+  "short_name": "QazBox",
+  "start_url": "./#/client",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#3456f5",
+  "lang": "ru",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "description": "Демо-прототип QazBox: сайт, кабинет клиента, склад, выкуп, админка (без бэкенда)",
+  "main": "index.js",
+  "scripts": {
+    "start": "python3 -m http.server 5173",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true
+}
