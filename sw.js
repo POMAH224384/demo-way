@@ -1,6 +1,6 @@
 /* Service Worker: офлайн-кэш оболочки приложения (PWA) */
-const CACHE = 'qazbox-v3';
-const ASSETS = ['./', 'index.html', 'js/icons.js', 'vendor/flags/us.svg', 'vendor/flags/gb.svg', 'vendor/flags/de.svg', 'vendor/flags/es.svg', 'vendor/flags/cn.svg', 'vendor/flags/tr.svg', 'css/styles.css', 'js/data.js', 'js/ui.js', 'js/site.js', 'js/client.js', 'js/ocr.js', 'js/warehouse.js', 'js/buyout.js', 'js/admin.js', 'js/app.js', 'icons/icon.svg', 'manifest.webmanifest'];
+const CACHE = 'qazbox-v4';
+const ASSETS = ['./', 'index.html', 'js/icons.js', 'vendor/flags/us.svg', 'vendor/flags/gb.svg', 'vendor/flags/de.svg', 'vendor/flags/es.svg', 'vendor/flags/cn.svg', 'vendor/flags/tr.svg', 'css/styles.css', 'js/data.js', 'js/ui.js', 'js/site.js', 'js/client.js', 'js/ocr.js', 'js/warehouse.js', 'js/buyout.js', 'js/admin.js', 'js/app.js', 'icons/icon.svg', 'manifest.webmanifest', 'b2b.html', 'css/b2b.css', 'js/b2b/data.js', 'js/b2b/site.js', 'js/b2b/cabinet.js', 'js/b2b/admin.js', 'js/b2b/cms.js', 'js/b2b/app.js'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
 // network-first для своих файлов, чтобы правки прототипа сразу были видны; кэш — при офлайне

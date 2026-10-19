@@ -1,8 +1,8 @@
-/* Публичный сайт: лендинг, калькулятор, каталог магазинов, помощь, трекинг, регистрация */
+/* Публичный сайт: лендинг с тарифами, каталог магазинов, помощь, трекинг, регистрация */
 const Site = {};
 
 const FAQ = [
-  ['Как получить адрес склада?', 'Зарегистрируйтесь — система сразу выдаст персональный ID-код (например, QB-10427) и адреса складов во всех странах. ID обязательно указывайте в строке Address 2 — по нему склад определяет владельца.'],
+  ['Как получить адрес склада?', 'Зарегистрируйтесь — система сразу выдаст персональный ID-код (например, WY-10427) и адреса складов во всех странах. ID обязательно указывайте в строке Address 2 — по нему склад определяет владельца.'],
   ['Что делать, если я забыл указать ID?', 'Ничего страшного: склад распознаёт этикетку по фото и найдёт вас по имени получателя. Если не получится — посылка попадёт в «нераспознанные», и вы сможете заявить её, указав трек-номер.'],
   ['Как считается стоимость доставки?', 'По большему из фактического и объёмного веса (Д×Ш×В/5000), по тарифу страны и вашему уровню лояльности. Минимальная стоимость зависит от страны.'],
   ['Сколько посылка хранится на складе бесплатно?', '30 дней (45 для уровня Gold и выше). Далее — $0.30 в день.'],
@@ -28,9 +28,9 @@ const TUTORIALS = [
 function siteHeader(active) {
   const logged = !!clientById(DB.session.clientId);
   return `<header class="site-header"><div class="container">
-    <a class="brand" href="#/"><span class="logo">Q</span>QazBox</a>
+    <a class="brand" href="#/"><span class="logo">W</span>Way</a>
     <nav class="site-nav" id="site-nav">
-      <a href="#/" data-action="scroll-calc" class="${active === 'home' ? 'active' : ''}">${t('nav_calc')}</a>
+      <a href="#/" data-action="scroll-tariffs" class="${active === 'home' ? 'active' : ''}">${t('nav_tariffs')}</a>
       <a href="#/stores" class="${active === 'stores' ? 'active' : ''}">${t('nav_stores')}</a>
       <a href="#/track" class="${active === 'track' ? 'active' : ''}">${t('nav_track')}</a>
       <a href="#/help" class="${active === 'help' ? 'active' : ''}">${t('nav_help')}</a>
@@ -42,64 +42,64 @@ function siteHeader(active) {
   </div></header>`;
 }
 A['burger'] = () => $('#site-nav')?.classList.toggle('open');
-A['scroll-calc'] = (el, e) => {
-  if (location.hash && location.hash !== '#/') return;
-  e.preventDefault(); $('#calc')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+A['scroll-tariffs'] = (el, e) => {
+  if (location.hash && location.hash !== '#/') { sessionStorage.setItem('qazbox-scroll', 'tariffs'); return; }
+  e.preventDefault(); $('#tariffs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
 function siteFooter() {
   return `<footer class="site-footer"><div class="container">
     <div class="grid g4">
-      <div><a class="brand" href="#/" style="color:#fff"><span class="logo">Q</span>QazBox</a><p class="mt-s">${t('footer_about')}</p><p class="small">© 2026 QazBox · Демо-прототип</p></div>
-      <div><h4>Сервис</h4><a href="#/">Калькулятор</a><a href="#/stores">Магазины</a><a href="#/track">Отслеживание</a><a href="#/client/buyout">Купи вместо меня</a></div>
+      <div><a class="brand" href="#/" style="color:#fff"><span class="logo">W</span>Way</a><p class="mt-s">${t('footer_about')}</p><p class="small">© 2026 Way · Демо-прототип</p></div>
+      <div><h4>Сервис</h4><a href="#/" data-action="scroll-tariffs">Тарифы</a><a href="#/stores">Магазины</a><a href="#/track">Отслеживание</a><a href="#/client/buyout">Купи вместо меня</a><a href="b2b.html">Для бизнеса (B2B)</a></div>
       <div><h4>Помощь</h4><a href="#/help?tab=faq">FAQ</a><a href="#/help?tab=tutorials">Туториалы</a><a href="#/help?tab=prohibited">Запрещённые товары</a><a href="#/help?tab=terms">Условия сервиса</a></div>
-      <div><h4>Контакты</h4><a>+7 727 355 00 00</a><a>hello@qazbox.kz</a><a>Telegram: @QazBoxBot</a><a>WhatsApp: +7 701 000 00 00</a></div>
+      <div><h4>Контакты</h4><a>+7 727 355 00 00</a><a>hello@way.kz</a><a>Telegram: @WayDeliveryBot</a><a>WhatsApp: +7 701 000 00 00</a></div>
     </div></div></footer>`;
 }
 
-function calculatorCard() {
-  const opts = DB.levels.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
-  return `<div class="card calc-card" id="calc">
-    <h3>${ic('calculator')} ${t('calc_title')}</h3>
-    <label class="field"><span>${t('calc_country')}</span><select id="calc-country" data-input="calc">${countryOptions('US')}</select></label>
-    <div class="inline-inputs">
-      <label class="field"><span>${t('calc_weight')}</span><input id="calc-w" type="number" step="0.1" min="0.1" value="1.5" data-input="calc"></label>
-      <label class="field"><span>${t('calc_level')}</span><select id="calc-level" data-input="calc">${opts}</select></label>
-    </div>
-    <label class="field"><span>${t('calc_dims')}</span><div class="inline-inputs">
-      <input id="calc-l" type="number" placeholder="Д" value="30" data-input="calc"><input id="calc-wd" type="number" placeholder="Ш" value="20" data-input="calc"><input id="calc-h" type="number" placeholder="В" value="15" data-input="calc"></div></label>
-    <div class="calc-result" id="calc-result"></div>
-    <p class="muted small mt-s">${t('calc_note')}</p>
-    <button class="btn accent block lg" data-action="auth">${t('calc_btn')} →</button>
-  </div>`;
-}
-CH['calc'] = () => {
-  const r = calcShipping($('#calc-country').value, +$('#calc-w').value, { l: +$('#calc-l').value, w: +$('#calc-wd').value, h: +$('#calc-h').value }, $('#calc-level').value);
-  if (!r) return;
-  $('#calc-result').innerHTML = `<div class="row between"><div><div class="muted small">${t('calc_total')}</div><div class="price">$${r.cost.toFixed(2)}</div><div class="muted">≈ ${kzt(r.cost)}</div></div>
-    <div class="right small"><div>Объёмный вес: <b>${r.vol} кг</b></div><div>К оплате: <b>${r.chargeable} кг</b> × $${r.perKg}</div><div>Срок: <b>${r.transit}</b></div>${r.cost === r.min ? `<div class="muted">мин. стоимость $${r.min}</div>` : ''}</div></div>`;
-};
-
 Site.home = () => {
   const countries = DB.countries.filter(c => c.active);
-  onMount(CH['calc']);
+  const me = clientById(DB.session.clientId), us = countryBy('US');
+  const cheapest = [...countries].sort((x, y) => x.perKg.base - y.perKg.base)[0]?.code;
+  // переход «Тарифы» с другой страницы: прокручиваем после рендера
+  try { if (sessionStorage.getItem('qazbox-scroll') === 'tariffs') { sessionStorage.removeItem('qazbox-scroll'); onMount(() => $('#tariffs')?.scrollIntoView({ block: 'start' })); } } catch {}
   return `${siteHeader('home')}
   <section class="hero"><div class="container hero-grid">
     <div>
       <span class="badge indigo mb">${flag('KZ')} Доставка в Казахстан с 2019 года</span>
       <h1>${t('hero_title')}</h1>
       <p class="lead">${t('hero_lead')}</p>
-      <div class="row"><button class="btn lg" data-action="auth">${t('hero_cta')}</button><a class="btn secondary lg" href="#/" data-action="scroll-calc">${t('hero_cta2')}</a></div>
+      <button class="btn lg accent hero-cta" data-action="auth">${t('hero_cta')} ${ic('arrow-right')}</button>
       <div class="bullets"><span>${t('hero_b1')}</span><span>${t('hero_b2')}</span><span>${t('hero_b3')}</span></div>
     </div>
-    ${calculatorCard()}
+    <div class="card addr-card" data-action="auth">
+      <div class="row between"><b>${flag('US')} ${t('addr_title')}</b><span class="badge green">${ic('gift')} 0 ₸</span></div>
+      <div class="addr-lines">
+        <div><span>Full name</span><b>${esc(me?.latin || 'AIGERIM NURLANOVA')}</b></div>
+        <div><span>Address 1</span><b>${esc(us.address.line1)}</b></div>
+        <div class="hl"><span>Address 2</span><b>${esc(me?.id || 'WY-10427')}</b></div>
+        <div><span>City / ZIP</span><b>${esc(us.address.city)}, DE ${esc(us.address.zip)}</b></div>
+      </div>
+      <p class="muted small" style="margin:0">${ic('info')} ${t('addr_note')}</p>
+      <div class="addr-flags">${countries.filter(c => c.code !== 'US').map(c => flag(c.code)).join('')}<span class="muted small">${t('addr_more')}</span></div>
+    </div>
   </div></section>
 
-  <section class="section alt"><div class="container">
-    <div class="section-title"><h2>${t('countries_title')}</h2><p>${t('countries_sub')}</p></div>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
-      ${countries.map(c => `<div class="card flat country-card"><span class="flag">${flag(c.code)}</span><div><b>${esc(c.name)}</b><div class="muted small">${c.transit} · от $${c.perKg.base}/кг</div></div></div>`).join('')}
+  <section class="section tariffs-section" id="tariffs"><div class="container">
+    <div class="section-title"><h2>${t('tariffs_title')}</h2><p>${t('tariffs_sub')}</p></div>
+    <div class="tariff-grid">${countries.map(c => `<div class="tariff-card ${c.code === cheapest ? 'best' : ''}">
+      ${c.code === cheapest ? `<span class="tariff-ribbon">${ic('star')} ${t('t_best')}</span>` : ''}
+      <div class="row nowrap tariff-country"><span class="flag-lg">${flag(c.code)}</span><div><b>${esc(c.name)}</b><div class="muted small">${ic('clock')} ${c.transit}</div></div></div>
+      <div class="tariff-price"><span class="cur">$</span>${c.perKg.base}<span class="unit">${t('per_kg')}</span></div>
+      <div class="muted small">≈ ${kzt(c.perKg.base)} · ${t('t_min')} $${c.minCharge}</div>
+      <div class="tariff-levels"><div class="muted small mb-s">${t('t_levels')}</div>${DB.levels.slice(1).map(l => `<div class="row between small"><span><span class="dot-st" style="background:${l.color}"></span> ${l.name}</span><b>$${c.perKg[l.id]}</b></div>`).join('')}</div>
+    </div>`).join('')}</div>
+    <div class="tariff-info">
+      <span>${ic('scale')} ${t('t_vol')}</span>
+      <span>${ic('truck')} ${t('t_courier')} — $${DB.settings.courierPrice}, ${t('t_free')} $${DB.settings.freeCourierFrom}</span>
+      <span>${ic('banknote')} ${t('t_rate')}: 1 USD = ${DB.settings.rates.KZT} ₸</span>
     </div>
+    <div class="center mt"><button class="btn lg accent" data-action="auth">${t('t_cta')} ${ic('arrow-right')}</button></div>
   </div></section>
 
   <section class="section"><div class="container">
@@ -115,13 +115,6 @@ Site.home = () => {
   <section class="section"><div class="container">
     <div class="row between mb"><h2 style="margin:0">${t('stores_title')}</h2><a href="#/stores">${t('stores_all')}</a></div>
     <div class="grid g4">${DB.stores.slice(0, 8).map(storeCard).join('')}</div>
-  </div></section>
-
-  <section class="section alt"><div class="container">
-    <div class="section-title"><h2>${t('tariffs_title')}</h2><p>${t('tariffs_sub')}</p></div>
-    <div class="card pad-0 table-wrap"><table class="t"><thead><tr><th>Страна</th>${DB.levels.map(l => `<th>${l.name}<div class="muted small" style="font-weight:400">от ${l.fromKg} кг</div></th>`).join('')}<th>Мин.</th><th>Срок</th></tr></thead>
-    <tbody>${countries.map(c => `<tr><td><b>${flag(c.code)} ${esc(c.name)}</b></td>${DB.levels.map(l => `<td>$${c.perKg[l.id]}/кг</td>`).join('')}<td>$${c.minCharge}</td><td>${c.transit}</td></tr>`).join('')}</tbody></table></div>
-    <p class="muted small center mt">Курьер по городу — $${DB.settings.courierPrice}, бесплатно при доставке от $${DB.settings.freeCourierFrom}. Курс: 1 USD = ${DB.settings.rates.KZT} ₸</p>
   </div></section>
 
   <section class="section"><div class="container"><div class="card" style="padding:32px;background:linear-gradient(135deg,#0b1020,#26306b);color:#fff;border:0">
@@ -231,7 +224,7 @@ function authModal(mode, method = 'email') {
       <label class="field"><span>Имя латиницей (как на посылках)</span><input name="latin" id="reg-latin" required placeholder="AIZHAN BEKOVA"></label>
       ${method === 'email' ? `<label class="field"><span>Email</span><input name="email" type="email" required placeholder="you@mail.kz"></label><label class="field"><span>Пароль</span><input name="password" type="password" required minlength="6" placeholder="Минимум 6 символов"></label>`
         : `<label class="field"><span>Телефон</span><input name="phone" required placeholder="+7 7__ ___ __ __" value="+7 "></label>`}
-      <label class="field"><span>Промокод друга (необязательно)</span><input name="ref" value="${esc(ref)}" placeholder="QB-10427"></label>
+      <label class="field"><span>Промокод друга (необязательно)</span><input name="ref" value="${esc(ref)}" placeholder="WY-10427"></label>
       <label class="check small"><input type="checkbox" required checked> Принимаю <a href="#/help?tab=terms" target="_blank">условия сервиса</a> и политику конфиденциальности</label>
       <button class="btn block lg mt">Зарегистрироваться</button></form>`;
   } else {
@@ -249,7 +242,7 @@ CH['translit'] = el => { const l = $('#reg-latin'); if (l && !l.dataset.touched)
 document.addEventListener('input', e => { if (e.target.id === 'reg-latin') e.target.dataset.touched = '1'; });
 
 function createClient({ name, latin, email, phone, ref, via }) {
-  const id = 'QB-' + (++DB.seq.client);
+  const id = 'WY-' + (++DB.seq.client);
   const c = { id, name, latin: (latin || translit(name)).toUpperCase(), email: email || '', phone: phone || '', city: 'Алматы', level: 'base', shippedKg: 0, balance: 0, bonus: 0, referrer: null, createdAt: new Date().toISOString(), via, channels: { email: !!email, sms: !!phone, whatsapp: false, telegram: false, push: false } };
   const r = ref && clientById(ref.trim().toUpperCase());
   DB.clients.unshift(c);
@@ -261,7 +254,7 @@ function createClient({ name, latin, email, phone, ref, via }) {
   }
   DB.session.clientId = id;
   logAction('client', `Регистрация клиента ${id} (${via})`);
-  notify(id, `Добро пожаловать в QazBox! Ваш персональный код: ${id}`, true);
+  notify(id, `Добро пожаловать в Way! Ваш персональный код: ${id}`, true);
   Store.save();
   closeModal();
   location.hash = '#/client/welcome';

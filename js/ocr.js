@@ -2,7 +2,7 @@
 const OCR = { state: null, worker: null, onPick: null, mode: 'modal' };
 
 const DEMO_LABELS = [
-  { key: 'id', title: 'С ID-кодом', carrier: 'UPS GROUND', track: '1Z999AA10400100001', from: ['AMAZON.COM SERVICES', '1850 MERCER RD', 'LEXINGTON KY 40511'], to: ['YERLAN SAPAROV', '1201 N ORANGE ST, SUITE 7', 'QB-10388', 'WILMINGTON DE 19801'] },
+  { key: 'id', title: 'С ID-кодом', carrier: 'UPS GROUND', track: '1Z999AA10400100001', from: ['AMAZON.COM SERVICES', '1850 MERCER RD', 'LEXINGTON KY 40511'], to: ['YERLAN SAPAROV', '1201 N ORANGE ST, SUITE 7', 'WY-10388', 'WILMINGTON DE 19801'] },
   { key: 'name', title: 'Без ID — только имя', carrier: 'USPS PRIORITY MAIL', track: '9400111899561234567890', from: ['IHERB LLC', '17400 LAGUNA CANYON RD', 'IRVINE CA 92618'], to: ['DINARA AKHMETOVA', '1201 N ORANGE ST', 'SUITE 7', 'WILMINGTON DE 19801'] },
   { key: 'typo', title: 'Имя с ошибкой', carrier: 'FEDEX HOME DELIVERY', track: '783456120987', from: ['SEPHORA USA INC', '350 MISSION ST', 'SAN FRANCISCO CA 94105'], to: ['MADINA ZHUMABAEVA', '1201 NORTH ORANGE STREET', 'WILMINGTON DE 19801'] },
   { key: 'unknown', title: 'Неизвестный получатель', carrier: 'UPS GROUND', track: '1Z999AA10400100099', from: ['EBAY SELLER 77', '45 MAIN ST', 'AUSTIN TX 78701'], to: ['JOHN SMITH', '1201 N ORANGE ST', 'WILMINGTON DE 19801'] },
@@ -59,12 +59,12 @@ const sim = (a, b) => 1 - lev(a, b) / Math.max(a.length, b.length);
 function matchLabel(text) {
   const up = String(text).toUpperCase();
   const res = { ids: [], names: [], track: null, recipientBlock: up };
-  // 1) ID-код: QB-12345 с поправкой на типичные ошибки OCR (O→0, I/L→1, S→5, B→8)
-  const re = /Q\s*[B8]\s*[-–—_.:\s]?\s*([0-9OILSBZ]{5})(?![0-9])/g;
+  // 1) ID-код: WY-12345 с поправкой на типичные ошибки OCR (O→0, I/L→1, S→5, B→8)
+  const re = /W\s*[YV]\s*[-–—_.:\s]?\s*([0-9OILSBZ]{5})(?![0-9])/g;
   let m;
   while ((m = re.exec(up))) {
     const digits = m[1].replace(/O/g, '0').replace(/[IL]/g, '1').replace(/S/g, '5').replace(/B/g, '8').replace(/Z/g, '2');
-    const id = 'QB-' + digits, c = clientById(id);
+    const id = 'WY-' + digits, c = clientById(id);
     res.ids.push({ raw: m[0], id, client: c });
   }
   const tr = up.match(/(?:TRACKING\s*#?:?\s*)([A-Z0-9 ]{10,30})/);
@@ -150,7 +150,7 @@ OCR.paint = () => {
       <h4>Распознанный текст ${s.simulated ? '<span class="badge orange">офлайн-симуляция</span>' : s.text ? '<span class="badge green">Tesseract OCR</span>' : ''}</h4>
       ${s.text ? `<div class="ocr-text">${hl}</div>` : '<div class="ocr-text" style="color:#64748b">— ожидание —</div>'}
       ${r?.track ? `<div class="small mt-s">Трек с этикетки: <b class="mono">${esc(r.track)}</b></div>` : ''}
-      <h4 class="mt">Владелец посылки</h4>${verdict || '<p class="muted small">Алгоритм: 1) ищем ID-код вида QB-12345 (с исправлением типичных ошибок OCR: O→0, I→1, S→5); 2) если кода нет — нечётко сравниваем имя из блока «SHIP TO» с латинскими именами клиентов (расстояние Левенштейна, инициалы).</p>'}
+      <h4 class="mt">Владелец посылки</h4>${verdict || '<p class="muted small">Алгоритм: 1) ищем ID-код вида WY-12345 (с исправлением типичных ошибок OCR: O→0, I→1, S→5); 2) если кода нет — нечётко сравниваем имя из блока «SHIP TO» с латинскими именами клиентов (расстояние Левенштейна, инициалы).</p>'}
     </div></div>`;
 };
 function matchCard(c, score, reason, best) {

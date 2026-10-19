@@ -30,13 +30,13 @@ function badge(status, map = STATUS) {
 /* ---------- i18n (сайт и навигация) ---------- */
 const I18N = {
   ru: {
-    nav_calc: 'Калькулятор', nav_stores: 'Магазины', nav_track: 'Отследить', nav_help: 'Помощь', nav_login: 'Войти', nav_cabinet: 'Личный кабинет',
+    nav_tariffs: 'Тарифы', nav_stores: 'Магазины', nav_track: 'Отследить', nav_help: 'Помощь', nav_login: 'Войти', nav_cabinet: 'Личный кабинет',
     hero_title: 'Покупайте за рубежом — <em>доставим в Казахстан</em>',
     hero_lead: 'Личные адреса складов в США, Англии, Германии, Испании и Китае. Объединяем посылки, выкупаем товары за вас и привозим до двери или в постамат.',
-    hero_cta: 'Получить адрес бесплатно', hero_cta2: 'Рассчитать стоимость',
+    hero_cta: 'Получить адрес бесплатно',
     hero_b1: `${ic('zap')} от 7 дней`, hero_b2: `${ic('credit-card')} Kaspi и карты`, hero_b3: `${ic('map-pin')} ПВЗ и постаматы`,
-    calc_title: 'Калькулятор доставки', calc_country: 'Страна склада', calc_weight: 'Вес, кг', calc_dims: 'Габариты, см (Д × Ш × В)',
-    calc_level: 'Уровень', calc_total: 'Стоимость доставки', calc_note: 'Объёмный вес = Д×Ш×В / 5000. Оплачивается больший из весов.', calc_btn: 'Отправить посылку',
+    addr_title: 'Ваш адрес в США', addr_note: 'Личный ID-код в строке Address 2 — по нему склад узнаёт вашу посылку', addr_more: 'и ещё 4 страны',
+    per_kg: '/кг', t_min: 'минимум', t_best: 'Самый выгодный', t_levels: 'Цена со скидкой по уровню', t_vol: 'Оплачивается больший из фактического и объёмного веса (Д×Ш×В / 5000)', t_courier: 'Курьер по городу', t_free: 'бесплатно при доставке от', t_rate: 'Курс', t_cta: 'Получить адрес и начать',
     how_title: 'Как это работает', how_sub: 'Четыре шага от корзины в зарубежном магазине до вашей двери',
     s1t: 'Зарегистрируйтесь', s1d: 'Получите персональный ID-код и адреса складов в 5 странах',
     s2t: 'Покупайте', s2d: 'Укажите адрес склада при оформлении заказа в любом магазине',
@@ -49,7 +49,7 @@ const I18N = {
     sv3t: 'Фото и проверка', sv3d: 'Покажем содержимое и сверим с заказом до отправки.',
     sv4t: 'Курьер и постаматы', sv4d: 'Получайте в ПВЗ, постамате 24/7 или курьером до двери.',
     stores_title: 'Популярные магазины', stores_all: 'Весь каталог →',
-    tariffs_title: 'Тарифы', tariffs_sub: 'Цена за 1 кг по уровню лояльности. Чем больше отправляете — тем дешевле.',
+    tariffs_title: 'Тарифы на доставку', tariffs_sub: 'Честная цена за 1 кг без скрытых платежей. Чем больше отправляете — тем дешевле.',
     app_title: 'Приложение всегда под рукой', app_sub: 'Установите веб-приложение на телефон прямо с сайта — без App Store и Google Play. Push-уведомления о каждом статусе.',
     app_install: 'Установить приложение',
     faq_title: 'Частые вопросы',
@@ -63,13 +63,13 @@ const I18N = {
     c_delivery: 'Получение', c_loyalty: 'Бонусы и друзья', c_support: 'Поддержка', c_settings: 'Настройки', c_more: 'Ещё',
   },
   kk: {
-    nav_calc: 'Калькулятор', nav_stores: 'Дүкендер', nav_track: 'Бақылау', nav_help: 'Көмек', nav_login: 'Кіру', nav_cabinet: 'Жеке кабинет',
+    nav_tariffs: 'Тарифтер', nav_stores: 'Дүкендер', nav_track: 'Бақылау', nav_help: 'Көмек', nav_login: 'Кіру', nav_cabinet: 'Жеке кабинет',
     hero_title: 'Шетелден сатып алыңыз — <em>Қазақстанға жеткіземіз</em>',
     hero_lead: 'АҚШ, Англия, Германия, Испания және Қытайдағы жеке қойма мекенжайлары. Сәлемдемелерді біріктіреміз, тауарды сіз үшін сатып аламыз және есікке не постаматқа дейін жеткіземіз.',
-    hero_cta: 'Мекенжайды тегін алу', hero_cta2: 'Құнын есептеу',
+    hero_cta: 'Мекенжайды тегін алу',
     hero_b1: `${ic('zap')} 7 күннен бастап`, hero_b2: `${ic('credit-card')} Kaspi және карталар`, hero_b3: `${ic('map-pin')} Беру пункттері мен постаматтар`,
-    calc_title: 'Жеткізу калькуляторы', calc_country: 'Қойма елі', calc_weight: 'Салмағы, кг', calc_dims: 'Өлшемдері, см (Ұ × Е × Б)',
-    calc_level: 'Деңгей', calc_total: 'Жеткізу құны', calc_note: 'Көлемдік салмақ = Ұ×Е×Б / 5000. Үлкен салмақ бойынша төленеді.', calc_btn: 'Сәлемдеме жіберу',
+    addr_title: 'АҚШ-тағы мекенжайыңыз', addr_note: 'Жеке ID-код Address 2 жолында — қойма сәлемдемеңізді сол арқылы таниды', addr_more: 'және тағы 4 ел',
+    per_kg: '/кг', t_min: 'ең аз', t_best: 'Ең тиімді', t_levels: 'Деңгей бойынша жеңілдікпен', t_vol: 'Нақты және көлемдік салмақтың үлкені бойынша төленеді (Ұ×Е×Б / 5000)', t_courier: 'Қала бойынша курьер', t_free: 'тегін, жеткізу құны', t_rate: 'Бағам', t_cta: 'Мекенжай алып, бастау',
     how_title: 'Бұл қалай жұмыс істейді', how_sub: 'Шетелдік дүкен себетінен есігіңізге дейін төрт қадам',
     s1t: 'Тіркеліңіз', s1d: 'Жеке ID-код пен 5 елдегі қойма мекенжайларын алыңыз',
     s2t: 'Сатып алыңыз', s2d: 'Тапсырыс беру кезінде қойма мекенжайын көрсетіңіз',
@@ -82,7 +82,7 @@ const I18N = {
     sv3t: 'Фото және тексеру', sv3d: 'Жөнелтер алдында ішін көрсетіп, тапсырыспен салыстырамыз.',
     sv4t: 'Курьер және постаматтар', sv4d: 'Пунктте, 24/7 постаматта немесе курьер арқылы алыңыз.',
     stores_title: 'Танымал дүкендер', stores_all: 'Толық каталог →',
-    tariffs_title: 'Тарифтер', tariffs_sub: 'Адалдық деңгейі бойынша 1 кг бағасы.',
+    tariffs_title: 'Жеткізу тарифтері', tariffs_sub: '1 кг үшін әділ баға, жасырын төлемсіз. Көп жіберсеңіз — арзанырақ.',
     app_title: 'Қосымша әрқашан қолыңызда', app_sub: 'Веб-қосымшаны телефонға тікелей сайттан орнатыңыз — App Store мен Google Play-сіз.',
     app_install: 'Қосымшаны орнату',
     faq_title: 'Жиі қойылатын сұрақтар',
@@ -96,13 +96,13 @@ const I18N = {
     c_delivery: 'Алу тәсілі', c_loyalty: 'Бонустар', c_support: 'Қолдау', c_settings: 'Баптаулар', c_more: 'Тағы',
   },
   en: {
-    nav_calc: 'Calculator', nav_stores: 'Stores', nav_track: 'Track', nav_help: 'Help', nav_login: 'Sign in', nav_cabinet: 'My account',
+    nav_tariffs: 'Rates', nav_stores: 'Stores', nav_track: 'Track', nav_help: 'Help', nav_login: 'Sign in', nav_cabinet: 'My account',
     hero_title: 'Shop abroad — <em>we deliver to Kazakhstan</em>',
     hero_lead: 'Personal warehouse addresses in the USA, UK, Germany, Spain and China. We consolidate parcels, buy for you and deliver to your door or a parcel locker.',
-    hero_cta: 'Get a free address', hero_cta2: 'Calculate cost',
+    hero_cta: 'Get a free address',
     hero_b1: `${ic('zap')} from 7 days`, hero_b2: `${ic('credit-card')} Kaspi & cards`, hero_b3: `${ic('map-pin')} Pickup points & lockers`,
-    calc_title: 'Shipping calculator', calc_country: 'Warehouse country', calc_weight: 'Weight, kg', calc_dims: 'Dimensions, cm (L × W × H)',
-    calc_level: 'Level', calc_total: 'Shipping cost', calc_note: 'Volumetric weight = L×W×H / 5000. The greater weight is charged.', calc_btn: 'Ship a parcel',
+    addr_title: 'Your address in the USA', addr_note: 'Your personal ID goes in Address 2 — that is how the warehouse recognises your parcel', addr_more: 'and 4 more countries',
+    per_kg: '/kg', t_min: 'minimum', t_best: 'Best value', t_levels: 'Discounted price by level', t_vol: 'The greater of actual and volumetric weight is charged (L×W×H / 5000)', t_courier: 'City courier', t_free: 'free for shipments from', t_rate: 'Rate', t_cta: 'Get an address and start',
     how_title: 'How it works', how_sub: 'Four steps from a foreign store cart to your door',
     s1t: 'Sign up', s1d: 'Get a personal ID code and warehouse addresses in 5 countries',
     s2t: 'Shop', s2d: 'Use our warehouse address at checkout in any store',
@@ -115,7 +115,7 @@ const I18N = {
     sv3t: 'Photos & inspection', sv3d: 'We show the contents and check against your order.',
     sv4t: 'Courier & lockers', sv4d: 'Pick up at a point, a 24/7 locker or get courier delivery.',
     stores_title: 'Popular stores', stores_all: 'Full catalog →',
-    tariffs_title: 'Rates', tariffs_sub: 'Price per kg by loyalty level. Ship more — pay less.',
+    tariffs_title: 'Shipping rates', tariffs_sub: 'A fair price per kg with no hidden fees. Ship more — pay less.',
     app_title: 'The app is always at hand', app_sub: 'Install the web app on your phone right from the site — no App Store or Google Play needed.',
     app_install: 'Install app',
     faq_title: 'FAQ',
@@ -175,7 +175,7 @@ function notify(clientId, text, silent = false) {
   DB.notifications.unshift({ id: 'N' + Date.now() + Math.random().toString(36).slice(2, 5), clientId, text, date: new Date().toISOString(), read: false, channels: ch });
   if (!silent) setTimeout(() => toast(`${ic('bell-ring')} Уведомление ${esc(c.name.split(' ')[0])} (${ch.map(x => CHANNEL_NAME[x]).join(', ') || 'в кабинете'}): ${esc(text)}`, 'info'), 350);
   if (ch.includes('push') && clientId === DB.session.clientId && 'Notification' in window && Notification.permission === 'granted') {
-    try { new Notification('QazBox', { body: text, icon: 'icons/icon.svg' }); } catch {}
+    try { new Notification('Way', { body: text, icon: 'icons/icon.svg' }); } catch {}
   }
 }
 function addTx(clientId, type, amount, note, method) {
@@ -286,8 +286,8 @@ function cabinetLayout({ area, brandSub, nav, current, content, userCard = '', m
   const navHtml = nav.map(n => n.group ? `<div class="nav-group">${n.group}</div>` :
     `<a class="nav ${n.key === current ? 'active' : ''}" href="#/${area}/${n.key}"><span class="ico">${n.icon}</span>${n.label}${n.count ? `<span class="cnt">${n.count}</span>` : ''}</a>`).join('');
   const mob = (mobileNav || nav.filter(n => !n.group).slice(0, 5));
-  return `<div class="mobile-head"><a class="brand" href="#/${area}"><span class="logo">Q</span>QazBox</a>${mobileRight}</div>
-  <div class="app"><aside class="sidebar"><a class="brand" href="#/"><span class="logo">Q</span><span>QazBox<small>${brandSub}</small></span></a>${navHtml}${userCard}</aside>
+  return `<div class="mobile-head"><a class="brand" href="#/${area}"><span class="logo">W</span>Way</a>${mobileRight}</div>
+  <div class="app"><aside class="sidebar"><a class="brand" href="#/"><span class="logo">W</span><span>Way<small>${brandSub}</small></span></a>${navHtml}${userCard}</aside>
   <main class="main">${content}</main></div>
   <nav class="bottom-nav">${mob.map(n => `<a href="#/${area}/${n.key}" class="${n.key === current ? 'active' : ''}"><span class="ico">${n.icon}</span>${n.short || n.label}</a>`).join('')}</nav>`;
 }

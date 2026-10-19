@@ -147,7 +147,7 @@ input.big { font-size: 20px; padding: 12px 14px; font-family: ui-monospace, Menl
 .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
 .chip .n { opacity: .7; margin-left: 4px; }
 
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; overflow-y: hidden; }
 .tabs a, .tabs button { padding: 10px 14px; color: var(--muted); border: 0; background: none; font: inherit; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; text-decoration: none; }
 .tabs .active { color: var(--primary); border-bottom-color: var(--primary); }
 
@@ -236,9 +236,36 @@ table.t input, table.t select { padding: 6px 8px; border-radius: 8px; }
 .feature .ico { font-size: 28px; margin-bottom: 10px; }
 .country-card { display: flex; align-items: center; gap: 14px; }
 .country-card .flag { font-size: 34px; }
-.calc-card { border-radius: 20px; padding: 24px; box-shadow: var(--shadow-lg); border: 0; }
-.calc-result { background: var(--primary-50); border-radius: 14px; padding: 16px; margin-top: 8px; }
-.calc-result .price { font-size: 34px; font-weight: 800; color: var(--primary); letter-spacing: -.02em; }
+.hero-cta { padding: 16px 28px; font-size: 17px; }
+.addr-card { border-radius: 20px; padding: 22px; box-shadow: var(--shadow-lg); border: 0; display: flex; flex-direction: column; gap: 14px; cursor: pointer; transition: transform .15s; }
+.addr-card:hover { transform: translateY(-2px); }
+.addr-lines { border: 1px dashed #c7d2fe; border-radius: 14px; overflow: hidden; }
+.addr-lines > div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.addr-lines > div:last-child { border-bottom: 0; }
+.addr-lines span { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.addr-lines b { font-family: ui-monospace, Menlo, monospace; text-align: right; overflow-wrap: anywhere; }
+.addr-lines .hl { background: var(--accent-50); }
+.addr-lines .hl b { color: var(--accent); font-size: 16px; }
+.addr-flags { display: flex; align-items: center; gap: 6px; font-size: 18px; }
+
+/* ---------- Тарифы на главной ---------- */
+.tariffs-section { background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%); border-top: 1px solid var(--border); }
+.tariff-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px 16px; padding-top: 12px; }
+.tariff-grid > .tariff-card { flex: 1 1 190px; max-width: 250px; }
+@media (max-width: 480px) { .tariff-grid > .tariff-card { max-width: none; } }
+.tariff-card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 22px 20px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px; transition: transform .15s, box-shadow .15s; }
+.tariff-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.tariff-card.best { border: 2px solid var(--accent); }
+.tariff-ribbon { position: absolute; top: -12px; left: 18px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; display: inline-flex; gap: 4px; align-items: center; }
+.tariff-country { gap: 10px; margin-bottom: 6px; }
+.tariff-country .flag-lg { font-size: 28px; line-height: 1; display: inline-flex; }
+.tariff-price { font-size: 46px; font-weight: 800; letter-spacing: -.03em; color: var(--primary); line-height: 1.05; }
+.tariff-card.best .tariff-price { color: var(--accent); }
+.tariff-price .cur { font-size: 24px; vertical-align: 16px; margin-right: 2px; }
+.tariff-price .unit { font-size: 16px; font-weight: 600; color: var(--muted); margin-left: 2px; letter-spacing: 0; }
+.tariff-levels { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border); display: grid; gap: 4px; }
+.tariff-info { display: flex; flex-wrap: wrap; gap: 10px 24px; justify-content: center; margin-top: 24px; color: #475569; font-size: 13.5px; }
+.tariff-info span { display: inline-flex; align-items: center; gap: 6px; }
 .store-card { display: flex; flex-direction: column; gap: 10px; }
 .store-logo { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 18px; flex-shrink: 0; }
 .site-footer { background: #0b1020; color: #94a3b8; padding: 48px 0 28px; }
@@ -386,3 +413,4 @@ img.flag { width: 1.34em; height: 1em; object-fit: cover; border-radius: 3px; ve
 .icon-tile { width: 44px; height: 44px; border-radius: 12px; background: var(--primary-50); color: var(--primary); display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
 .card-head h3 { display: flex; align-items: center; gap: 6px; }
 .topbar h1 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tariffs-section { scroll-margin-top: calc(var(--rolebar-h) + 66px); }

@@ -38,7 +38,7 @@ Client.render = (parts, q) => {
 Client.loginGate = () => `${siteHeader('')}<div class="container" style="padding:80px 20px;max-width:520px;text-align:center">
   <div class="icon-tile" style="width:72px;height:72px;font-size:34px;margin:0 auto 16px">${ic('lock')}</div><h1>Войдите в кабинет</h1><p class="muted">Чтобы получить адреса складов и отслеживать посылки</p>
   <div class="row" style="justify-content:center"><button class="btn lg" data-action="auth" data-force="1">Регистрация</button><button class="btn secondary lg" data-action="demo-login">Войти как демо-клиент</button></div></div>`;
-A['demo-login'] = () => { DB.session.clientId = 'QB-10427'; Store.save(); render(); };
+A['demo-login'] = () => { DB.session.clientId = 'WY-10427'; Store.save(); render(); };
 A['logout'] = () => { DB.session.clientId = null; Store.save(); location.hash = '#/'; toast('Вы вышли из кабинета'); };
 
 Client.more = () => `${pageHead('Ещё')}<div class="card pad-0">${[['addresses', ic('map-pin'), t('c_addresses')], ['delivery', ic('truck'), t('c_delivery')], ['loyalty', ic('gift'), t('c_loyalty')], ['support', ic('message-circle'), t('c_support')], ['notifications', ic('bell'), 'Уведомления'], ['settings', ic('settings'), t('c_settings')]]
@@ -387,7 +387,7 @@ Client.wallet = (_, q, c) => {
 };
 A['invoice-pdf'] = el => {
   const b = byId(DB.buyouts, el.dataset.id), c = clientById(b.clientId), k = buyoutCalc(b);
-  openModal('Счёт ' + b.invoiceId, `<div id="inv-print"><div class="row between"><div class="brand"><span class="logo">Q</span>QazBox</div><div class="right small">ТОО «QazBox Logistics»<br>БИН 000000000000</div></div><hr>
+  openModal('Счёт ' + b.invoiceId, `<div id="inv-print"><div class="row between"><div class="brand"><span class="logo">W</span>Way</div><div class="right small">ТОО «Way Logistics»<br>БИН 000000000000</div></div><hr>
     <p><b>Счёт № ${b.invoiceId}</b> от ${fdate(b.createdAt)}<br>Плательщик: ${esc(c.name)} (${c.id})</p>
     <table class="t"><tbody>${b.items.map(i => `<tr><td>${esc(i.title)} × ${i.qty}</td><td class="right">${usd((i.actual ?? i.price) * i.qty)}</td></tr>`).join('')}<tr><td>Доставка по стране</td><td class="right">${usd(b.localShipping)}</td></tr><tr><td>Комиссия сервиса ${b.commissionPct}%</td><td class="right">${usd(k.commission)}</td></tr><tr><td><b>Итого</b></td><td class="right"><b>${usd(b.total)} (${kzt(b.total)})</b></td></tr></tbody></table></div>
     <div class="modal-foot"><button class="btn" onclick="window.print()">${ic('printer')} Печать / PDF</button></div>`);
@@ -477,7 +477,7 @@ Client.support = (parts, _, c) => {
   return `${pageHead('Поддержка', '', `<button class="btn" data-action="ticket-new">${ic('plus')} Новое обращение</button>`)}
   <div class="grid g-side">${cur ? ticketView(cur, 'client') : `<div class="card">${list.length ? '<p class="muted">Выберите обращение справа</p>' : empty('Обращений нет', ic('message-circle'))}</div>`}
   <div class="card pad-0">${list.map(tk => `<div class="parcel-item" data-action="go" data-href="#/client/support/${tk.id}"><div class="meta"><b>${esc(tk.subject)}</b><div class="muted small">${tk.id} · ${fdate(tk.createdAt)}</div></div>${tk.status === 'open' ? '<span class="badge orange">Открыто</span>' : '<span class="badge green">Решено</span>'}</div>`).join('')}
-  <div style="padding:14px" class="small muted">Также пишите в Telegram <b>@QazBoxBot</b> или WhatsApp — ответы попадут сюда.</div></div></div>`;
+  <div style="padding:14px" class="small muted">Также пишите в Telegram <b>@WayDeliveryBot</b> или WhatsApp — ответы попадут сюда.</div></div></div>`;
 };
 function ticketView(tk, side) {
   const c = clientById(tk.clientId);
@@ -518,7 +518,7 @@ Client.settings = (_, __, c) => {
     <h4 class="mt">Язык интерфейса</h4>${langSwitch()}</div>
   <div class="card"><h3>Каналы уведомлений</h3>
     ${row('email', ic('mail'), 'Email', esc(c.email || 'не указан'))}${row('sms', ic('message-circle'), 'SMS', esc(c.phone || 'не указан'))}${row('whatsapp', ic('message-circle-more'), 'WhatsApp', 'WhatsApp Business API')}
-    ${row('telegram', ic('plane'), 'Telegram', ch.telegram ? 'Бот @QazBoxBot подключён' : 'Нажмите, чтобы подключить @QazBoxBot')}${row('push', ic('bell'), 'Push (PWA)', 'Уведомления в браузере/на телефоне')}
+    ${row('telegram', ic('plane'), 'Telegram', ch.telegram ? 'Бот @WayDeliveryBot подключён' : 'Нажмите, чтобы подключить @WayDeliveryBot')}${row('push', ic('bell'), 'Push (PWA)', 'Уведомления в браузере/на телефоне')}
     <button class="btn secondary sm mt" data-action="test-notify">Отправить тестовое уведомление</button></div></div>`;
 };
 CH['channel'] = async el => {
@@ -527,7 +527,7 @@ CH['channel'] = async el => {
     const r = await Notification.requestPermission().catch(() => 'denied');
     if (r !== 'granted') toast('Браузер не разрешил push — в демо уведомления будут в кабинете', 'err');
   }
-  if (el.dataset.ch === 'telegram' && el.checked) toast('В боевой версии откроется t.me/QazBoxBot?start=' + c.id + ' для привязки', 'info');
+  if (el.dataset.ch === 'telegram' && el.checked) toast('В боевой версии откроется t.me/WayDeliveryBot?start=' + c.id + ' для привязки', 'info');
   c.channels[el.dataset.ch] = el.checked; Store.save();
 };
 A['test-notify'] = () => { notify(me().id, 'Тестовое уведомление: всё работает'); Store.save(); };

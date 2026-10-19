@@ -1,6 +1,6 @@
 {
-  "name": "QazBox — доставка в Казахстан",
-  "short_name": "QazBox",
+  "name": "Way — доставка в Казахстан",
+  "short_name": "Way",
   "start_url": "./#/client",
   "scope": "./",
   "display": "standalone",

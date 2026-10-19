@@ -9,6 +9,7 @@ const ROLES = [
   { key: 'buyout', label: `${ic('shopping-bag')} Менеджер выкупа`, href: '#/buyout' },
   { key: 'admin', label: `${ic('settings')} Администратор`, href: '#/admin' },
   { key: 'mobile', label: `${ic('smartphone')} Приложение`, href: '#/mobile' },
+  { key: 'b2b', label: `${ic('briefcase')} B2B-направление`, href: 'b2b.html' },
 ];
 function roleBar(area) {
   return `<div class="rolebar no-print"><span class="tag">DEMO</span>
@@ -35,16 +36,16 @@ function render() {
   const q = new URLSearchParams(qs || '');
   const parts = path.split('/').filter(Boolean);
   const area = parts[0] || '';
-  let html, roleKey = 'site', title = 'QazBox — доставка из-за рубежа в Казахстан';
+  let html, roleKey = 'site', title = 'Way — доставка из-за рубежа в Казахстан';
   switch (area) {
-    case 'client': html = Client.render(parts.slice(1), q); roleKey = 'client'; title = 'Личный кабинет · QazBox'; break;
-    case 'warehouse': html = WH.render(parts.slice(1), q); roleKey = 'warehouse'; title = 'Склад · QazBox'; break;
-    case 'buyout': html = BY.render(parts.slice(1), q); roleKey = 'buyout'; title = 'Выкуп · QazBox'; break;
-    case 'admin': html = AD.render(parts.slice(1), q); roleKey = 'admin'; title = 'Админ-панель · QazBox'; break;
-    case 'mobile': html = mobilePage(); roleKey = 'mobile'; title = 'Мобильное приложение · QazBox'; break;
-    case 'stores': html = Site.stores(q); title = 'Каталог магазинов · QazBox'; break;
-    case 'help': html = Site.help(q); title = 'Помощь · QazBox'; break;
-    case 'track': html = Site.track(q); title = 'Отслеживание · QazBox'; break;
+    case 'client': html = Client.render(parts.slice(1), q); roleKey = 'client'; title = 'Личный кабинет · Way'; break;
+    case 'warehouse': html = WH.render(parts.slice(1), q); roleKey = 'warehouse'; title = 'Склад · Way'; break;
+    case 'buyout': html = BY.render(parts.slice(1), q); roleKey = 'buyout'; title = 'Выкуп · Way'; break;
+    case 'admin': html = AD.render(parts.slice(1), q); roleKey = 'admin'; title = 'Админ-панель · Way'; break;
+    case 'mobile': html = mobilePage(); roleKey = 'mobile'; title = 'Мобильное приложение · Way'; break;
+    case 'stores': html = Site.stores(q); title = 'Каталог магазинов · Way'; break;
+    case 'help': html = Site.help(q); title = 'Помощь · Way'; break;
+    case 'track': html = Site.track(q); title = 'Отслеживание · Way'; break;
     default:
       html = Site.home();
       if (q.get('ref') && !clientById(DB.session.clientId)) onMount(() => authModal('register'));
@@ -92,8 +93,8 @@ A['scenarios'] = () => openModal(`${ic('clapperboard')} Сценарии для 
     ['5. Консолидация', 'Клиент → Посылки → отметить P-1002 и P-1003 → Объединить. Затем Склад → Заявки на услуги → Выполнить', '#/client/parcels?g=stock'],
     ['6. Оплата и отправка', 'Клиент → Кошелёк (Kaspi/карта) → оплатить доставку. Склад → Партии → сформировать → провести по статусам до «Выдача»', '#/client/wallet'],
     ['7. Купи вместо меня', 'Клиент создаёт заявку → Менеджер выкупа выставляет счёт → клиент платит → менеджер выкупает и указывает трек → склад принимает', '#/buyout'],
-    ['8. Выдача', 'Склад → Выдача → QB-10427 → Выдать (код в кабинете клиента)', '#/warehouse/issue?c=QB-10427'],
-    ['9. Админка', 'Тарифы и курсы (меняют калькулятор), страны, клиенты с корректировкой баланса, отчёты с экспортом XLSX, журнал действий', '#/admin'],
+    ['8. Выдача', 'Склад → Выдача → WY-10427 → Выдать (код в кабинете клиента)', '#/warehouse/issue?c=WY-10427'],
+    ['9. Админка', 'Тарифы и курсы (сразу меняются на сайте), страны, клиенты с корректировкой баланса, отчёты с экспортом XLSX, журнал действий', '#/admin'],
   ].map(([h, d, href]) => `<label data-action="go" data-href="${href}"><span><b>${h}</b><br><span class="muted small">${d}</span></span></label>`).join('')}</div>`, { wide: true });
 
 /* ---------- Старт ---------- */

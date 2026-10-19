@@ -78,7 +78,7 @@ WH.receive = () => {
         ${exp?.items.length ? `<div class="muted small mt">Декларация клиента: ${esc(exp.items.map(i => `${i.name} ×${i.qty}`).join(', '))}</div>` : ''}
         ${exp?.services.length ? `<div class="notice warn mt">Клиент заказал: ${exp.services.map(s => SERVICES[s.type].icon + ' ' + SERVICES[s.type].name).join(', ')}</div>` : ''}`
       : `<div class="notice warn mb">Клиент не добавил этот трек. Определите владельца по ID-коду на этикетке (строка Address 2) или распознайте фото этикетки.</div>
-        <form class="row nowrap" data-form="rx-client"><input name="id" placeholder="QB-10427" class="mono" list="clients-dl"><datalist id="clients-dl">${DB.clients.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</datalist><button class="btn secondary">Найти</button></form>
+        <form class="row nowrap" data-form="rx-client"><input name="id" placeholder="WY-10427" class="mono" list="clients-dl"><datalist id="clients-dl">${DB.clients.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</datalist><button class="btn secondary">Найти</button></form>
         <div class="row mt-s"><button class="btn accent" data-action="rx-ocr">${ic('camera')} Распознать этикетку по фото</button><span class="muted small">или примите как нераспознанную</span></div>`}
     </div>
     <div class="card mb"><h3>3. Взвешивание и замеры</h3>
@@ -94,7 +94,7 @@ WH.receive = () => {
     <button class="btn ${client ? 'success' : 'danger'} lg block" data-action="rx-accept">${client ? `${ic('circle-check')} Принять на склад → ${client.id}` : `${ic('circle-help')} Принять как нераспознанную`}</button>` : ''}
   </div>
   <div><div class="card"><h4>Подсказка оператору</h4><ol class="muted small" style="padding-left:18px;line-height:1.9">
-    <li>Отсканируйте трек — система найдёт предзаявку клиента.</li><li>Нет предзаявки → ищем ID-код QB-xxxxx на этикетке, вводим вручную или через OCR.</li>
+    <li>Отсканируйте трек — система найдёт предзаявку клиента.</li><li>Нет предзаявки → ищем ID-код WY-xxxxx на этикетке, вводим вручную или через OCR.</li>
     <li>Нет кода → OCR найдёт клиента по имени получателя.</li><li>Взвесьте, измерьте, сфотографируйте.</li><li>Наклейте внутренний стикер с ячейкой.</li></ol>
     <p class="small">Клиент мгновенно получит уведомление в Telegram/WhatsApp/Email/Push.</p></div>
     ${RX.labelText ? `<div class="card mt"><h4>Текст этикетки (OCR)</h4><div class="ocr-text">${esc(RX.labelText)}</div></div>` : ''}</div></div>`;
@@ -111,7 +111,7 @@ F['rx-scan'] = d => {
   render();
 };
 F['rx-client'] = d => {
-  const id = d.id.trim().toUpperCase().replace(/^QB(\d)/, 'QB-$1');
+  const id = d.id.trim().toUpperCase().replace(/^WY(\d)/, 'WY-$1');
   const c = clientById(id) || DB.clients.find(x => x.name.toLowerCase().includes(d.id.trim().toLowerCase()) || x.latin.includes(d.id.trim().toUpperCase()));
   if (!c) return toast('Клиент не найден', 'err');
   RX.clientId = c.id; RX.source = 'Введён вручную'; render();
@@ -173,7 +173,7 @@ function printSticker(p) {
   const c = clientById(p.clientId);
   const bars = Array.from({ length: 46 }, (_, i) => `<rect x="${i * 6}" y="0" width="${(i * 7 + p.id.length) % 3 + 1.5}" height="50"/>`).join('');
   openModal(`${ic('circle-check')} Посылка принята`, `<div id="sticker" style="border:3px solid #111;border-radius:12px;padding:16px;max-width:340px;margin:0 auto;font-family:ui-monospace,monospace">
-    <div class="row between"><b style="font-size:13px">QAZBOX · ${p.country}</b><b style="font-size:13px">${fdate(new Date())}</b></div>
+    <div class="row between"><b style="font-size:13px">WAY · ${p.country}</b><b style="font-size:13px">${fdate(new Date())}</b></div>
     <div style="font-size:42px;font-weight:800;text-align:center;margin:8px 0">${c ? c.id : '??????'}</div>
     <div class="row between"><span>Ячейка</span><b style="font-size:22px">${esc(p.cell)}</b></div><div class="row between"><span>Посылка</span><b>${p.id}</b></div><div class="row between"><span>Вес</span><b>${kg(p.weight)}</b></div>
     <svg viewBox="0 0 276 50" style="width:100%;margin-top:10px">${bars}</svg><div class="center small">${esc(p.track)}</div></div>
@@ -182,7 +182,7 @@ function printSticker(p) {
 
 /* ---------- OCR как отдельный экран ---------- */
 WH.ocrPage = () => `${pageHead(`${ic('scan-search')} Распознавание этикетки`, 'Определение владельца посылки по фото')}
-  <div class="notice mb">Сфотографируйте этикетку перевозчика. Система найдёт персональный ID-код (QB-xxxxx), а если его нет — сопоставит имя получателя с базой клиентов. Работает прямо в браузере на телефоне/планшете оператора (Tesseract OCR); в боевой версии можно подключить облачный OCR (Google Vision / Яндекс Vision) для рукописных этикеток.</div>
+  <div class="notice mb">Сфотографируйте этикетку перевозчика. Система найдёт персональный ID-код (WY-xxxxx), а если его нет — сопоставит имя получателя с базой клиентов. Работает прямо в браузере на телефоне/планшете оператора (Tesseract OCR); в боевой версии можно подключить облачный OCR (Google Vision / Яндекс Vision) для рукописных этикеток.</div>
   <div class="card">${OCR.inline(info => {
     rxReset(); RX.country = whc();
     Object.assign(RX, { step: 'measure', track: info.track || ('NEW' + Date.now().toString().slice(-9)), clientId: info.clientId, source: info.clientId ? info.source : '', labelText: info.labelText, photos: info.img ? [info.img] : [] });
@@ -203,7 +203,7 @@ WH.unidentified = () => {
         ${p.labelText ? `<div class="ocr-text mt-s">${esc(p.labelText)}</div>` : ''}</div>
       <div><h4>Привязать к клиенту</h4>
         ${sug.length ? `<div class="muted small mb-s">Возможные владельцы по имени:</div>${sug.map(n => `<div class="match"><div class="score" style="font-size:14px;width:44px">${n.score}%</div><div class="grow small"><b>${esc(n.client.name)}</b><br><span class="mono muted">${n.client.id}</span></div><button class="btn secondary sm" data-action="unid-assign" data-id="${p.id}" data-client="${n.client.id}">Привязать</button></div>`).join('')}` : ''}
-        <form class="row nowrap" data-form="unid-assign"><input type="hidden" name="pid" value="${p.id}"><input name="client" placeholder="QB-xxxxx" list="clients-dl2" class="mono"><button class="btn sm">OK</button></form>
+        <form class="row nowrap" data-form="unid-assign"><input type="hidden" name="pid" value="${p.id}"><input name="client" placeholder="WY-xxxxx" list="clients-dl2" class="mono"><button class="btn sm">OK</button></form>
         <datalist id="clients-dl2">${DB.clients.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</datalist>
         <button class="btn ghost sm mt-s" data-action="unid-photo-ocr" data-id="${p.id}">${ic('scan-search')} Распознать новое фото этикетки</button>
       </div></div></div>`;
@@ -389,7 +389,7 @@ F['issue-do'] = d => {
   const oldLvl = c.level;
   c.shippedKg = Math.round((c.shippedKg + p.weight) * 10) / 10;
   c.level = levelForKg(c.shippedKg).id;
-  notify(c.id, `Посылка ${p.id} получена. Спасибо, что выбираете QazBox! Оцените сервис`, true);
+  notify(c.id, `Посылка ${p.id} получена. Спасибо, что выбираете Way! Оцените сервис`, true);
   if (c.level !== oldLvl) notify(c.id, `Новый уровень лояльности: ${levelOf(c).name}!`);
   logAction('warehouse', `Выдана посылка ${p.id} клиенту ${c.id}`);
   Store.save(); closeModal(); render(); toast(`${ic('circle-check')} Посылка выдана`, 'ok');

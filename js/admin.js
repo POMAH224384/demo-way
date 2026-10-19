@@ -225,7 +225,7 @@ F['ad-tariffs'] = d => {
   Object.keys(DB.settings.rates).forEach(k => { const v = +d['r_' + k]; if (v !== DB.settings.rates[k]) changes.push(`курс ${k}: ${DB.settings.rates[k]}→${v}`); DB.settings.rates[k] = v; });
   ['courierPrice', 'freeCourierFrom', 'storageFreeDays', 'storageFeePerDay', 'volumetricDivider', 'referralBonus'].forEach(k => DB.settings[k] = +d[k]);
   logAction('admin', 'Обновлены тарифы и настройки' + (changes.length ? ': ' + changes.slice(0, 6).join(', ') : ''));
-  Store.save(); render(); toast('Тарифы сохранены — калькулятор на сайте уже использует новые цены', 'ok');
+  Store.save(); render(); toast('Тарифы сохранены — на сайте уже показаны новые цены', 'ok');
 };
 
 /* ---------- Страны ---------- */
@@ -233,7 +233,7 @@ AD.countries = () => `${pageHead(`${ic('globe')} Страны и адреса с
   <div class="grid g3">${DB.countries.map(c => `<div class="card"><div class="row between"><h3 style="margin:0">${flag(c.code)} ${esc(c.name)}</h3><label class="check small"><input type="checkbox" data-change="ad-country-toggle" data-code="${c.code}" ${c.active ? 'checked' : ''}> Активна</label></div>
     <div class="small muted mt-s">${esc(c.address.line1)}, ${esc(c.address.city)} ${esc(c.address.zip)}<br>${esc(c.address.phone)}</div><div class="small mt-s">${c.transit} · от $${c.perKg.base}/кг</div>
     <button class="btn ghost sm mt-s" data-action="ad-country-edit" data-code="${c.code}">Редактировать</button></div>`).join('')}</div>
-  <p class="muted small mt">Включённая страна сразу появляется у клиентов в «Мои адреса», в калькуляторе, каталоге и на складе.</p>`;
+  <p class="muted small mt">Включённая страна сразу появляется у клиентов в «Мои адреса», в тарифах на сайте, каталоге и на складе.</p>`;
 CH['ad-country-toggle'] = el => { const c = countryBy(el.dataset.code); c.active = el.checked; logAction('admin', `Страна ${c.name}: ${c.active ? 'включена' : 'выключена'}`); Store.save(); toast(`${flag(c.code)} ${c.name} ${c.active ? 'включена' : 'выключена'}`); };
 A['ad-country-edit'] = el => {
   const c = countryBy(el.dataset.code) || { code: '', name: '', flag: '', transit: '7–12 дней', minCharge: 5, perKg: { base: 9, silver: 8.5, gold: 8, platinum: 7.5 }, address: { line1: '', line2: '{ID}', city: '', region: '', zip: '', phone: '' } };
@@ -274,7 +274,7 @@ AD.integrations = () => {
     <div class="row mt-s">${I[k].on ? '<span class="badge green">● Подключено</span>' : '<span class="badge">Выключено</span>'}${I[k].mode === 'test' ? '<span class="badge orange">Тестовый режим</span>' : ''}${extra}</div></div>`;
   const log = (DB.integrationLog || []).concat([
     { date: new Date(Date.now() - 36e5).toISOString(), svc: 'Kaspi Pay', dir: '←', text: 'webhook payment.success order=TX-4998 amount=15150 KZT' },
-    { date: new Date(Date.now() - 72e5).toISOString(), svc: 'Telegram Bot', dir: '→', text: 'sendMessage chat=QB-10427 «Посылка P-1005 готова к выдаче»' },
+    { date: new Date(Date.now() - 72e5).toISOString(), svc: 'Telegram Bot', dir: '→', text: 'sendMessage chat=WY-10427 «Посылка P-1005 готова к выдаче»' },
     { date: new Date(Date.now() - 9e6).toISOString(), svc: 'WhatsApp Business', dir: '→', text: 'template parcel_arrived → +7 701 *** ** 34 (delivered)' },
   ]);
   return `${pageHead(`${ic('plug')} Интеграции`)}
@@ -310,7 +310,7 @@ A['export-xlsx'] = async el => {
     report: () => monthlySeries().map(x => ({ 'Месяц': x.label, 'Оборот, $': x.revenue, 'Вес, кг': x.weight, 'Посылок': x.parcels, 'Прибыль, $': x.profit })),
   };
   const rows = sheets[what]();
-  const name = `qazbox-${what}-${new Date().toISOString().slice(0, 10)}`;
+  const name = `way-${what}-${new Date().toISOString().slice(0, 10)}`;
   try {
     await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
     const wb = XLSX.utils.book_new();

@@ -1,7 +1,7 @@
 {
   "name": "demo",
   "version": "1.0.0",
-  "description": "Демо-прототип QazBox: сайт, кабинет клиента, склад, выкуп, админка (без бэкенда)",
+  "description": "Демо-прототип Way: сайт, кабинет клиента, склад, выкуп, админка (без бэкенда)",
   "main": "index.js",
   "scripts": {
     "start": "python3 -m http.server 5173",
