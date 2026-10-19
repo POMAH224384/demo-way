@@ -42,7 +42,7 @@ function monthlySeries() {
     months.push({ label: d.toLocaleDateString('ru-RU', { month: 'short' }).replace('.', ''), revenue: Math.round(base), weight: Math.round(base / 9.2), parcels: Math.round(base / 21), profit: Math.round(base * 0.31) });
   }
   // текущий месяц дополняем реальными операциями из демо-базы
-  const cur = DB.transactions.filter(x => x.type === 'charge' && daysSince(x.date) <= now.getDate()).reduce((s, x) => s - x.amount, 0);
+  const cur = DB.payments.filter(x => daysSince(x.date) <= now.getDate()).reduce((s, x) => s + x.amount, 0);
   months[11].revenue += Math.round(cur); months[11].profit += Math.round(cur * 0.31);
   return months;
 }
@@ -60,7 +60,7 @@ function barChart(series, key, fmt = v => v) {
   return `<div class="bars">${series.map((x, i) => `<div class="bar" title="${x.label}: ${fmt(x[key])}"><div class="${i === series.length - 1 ? 'cur' : ''}" style="height:${(x[key] / max) * 100}%"></div><span>${x.label}</span></div>`).join('')}</div>`;
 }
 function weightByCountry() {
-  const rows = DB.countries.filter(c => c.active).map(c => ({ c, w: DB.parcels.filter(p => p.country === c.code && p.weight).reduce((s, p) => s + p.weight, 0) * 37 + c.perKg.base * 10 }));
+  const rows = DB.countries.filter(c => c.active).map(c => ({ c, w: DB.parcels.filter(p => p.country === c.code && p.weight).reduce((s, p) => s + p.weight, 0) * 37 + c.perKg * 10 }));
   const max = Math.max(...rows.map(r => r.w));
   return rows.sort((a, b) => b.w - a.w).map(r => `<div class="hbar"><span>${flag(r.c.code)} ${esc(r.c.name)}</span><div class="track"><div style="width:${(r.w / max) * 100}%"></div></div><b class="right">${Math.round(r.w)} кг</b></div>`).join('');
 }
@@ -117,8 +117,8 @@ AD.clients = (_, q) => {
   const list = DB.clients.filter(c => !f || [c.id, c.name, c.latin, c.email, c.phone].join(' ').toLowerCase().includes(f));
   return `${pageHead(`${ic('users')} Клиенты`, `${list.length} в демо-базе`, `<button class="btn secondary" data-action="export-xlsx" data-what="clients">${ic('download')} XLSX</button>`)}
   <form class="row nowrap mb" data-form="ad-clients"><input name="q" value="${esc(f)}" placeholder="ID, имя, email, телефон"><button class="btn secondary">Найти</button></form>
-  <div class="card pad-0 table-wrap"><table class="t"><thead><tr><th>Клиент</th><th>Контакты</th><th>Город</th><th>Уровень</th><th>Отправлено</th><th>Баланс</th><th>Посылок</th><th>Регистрация</th></tr></thead><tbody>
-  ${list.map(c => `<tr class="click" data-action="go" data-href="#/admin/client/${c.id}"><td>${clientChip(c.id)}${c.blocked ? ' <span class="badge red">Заблокирован</span>' : ''}</td><td class="small">${esc(c.email)}<br>${esc(c.phone)}</td><td>${esc(c.city)}</td><td><span class="badge" style="background:${levelOf(c).color};color:#fff">${levelOf(c).name}</span></td><td>${kg(c.shippedKg)}</td><td>${usd(c.balance)}</td><td>${DB.parcels.filter(p => p.clientId === c.id).length}</td><td class="small">${fdate(c.createdAt)}<br><span class="muted">${esc(c.via || '')}</span></td></tr>`).join('')}
+  <div class="card pad-0 table-wrap"><table class="t"><thead><tr><th>Клиент</th><th>Контакты</th><th>Город</th><th>Посылок</th><th class="right">Оплачено</th><th>Регистрация</th></tr></thead><tbody>
+  ${list.map(c => `<tr class="click" data-action="go" data-href="#/admin/client/${c.id}"><td>${clientChip(c.id)}${c.blocked ? ' <span class="badge red">Заблокирован</span>' : ''}</td><td class="small">${esc(c.email)}<br>${esc(c.phone)}</td><td>${esc(c.city)}</td><td>${DB.parcels.filter(p => p.clientId === c.id).length}</td><td class="right nowrap">${usd(paidTotal(c.id))}</td><td class="small">${fdate(c.createdAt)}<br><span class="muted">${esc(c.via || '')}</span></td></tr>`).join('')}
   </tbody></table></div>`;
 };
 F['ad-clients'] = d => { location.hash = '#/admin/clients?q=' + encodeURIComponent(d.q); };
@@ -126,25 +126,16 @@ AD.client = ([id]) => {
   const c = clientById(id);
   if (!c) return empty('Клиент не найден');
   const ps = DB.parcels.filter(p => p.clientId === c.id);
-  const tx = DB.transactions.filter(x => x.clientId === c.id);
+  const pays = DB.payments.filter(x => x.clientId === c.id);
   return `${pageHead(esc(c.name), '<a href="#/admin/clients">Клиенты</a> / ' + c.id, `<button class="btn secondary" data-action="ad-impersonate" data-id="${c.id}">${ic('eye')} Открыть кабинет клиента</button>`)}
-  <div class="grid g3 mb"><div class="card">${clientChip(c.id)}<div class="kv mt"><div>Латиницей</div><div>${esc(c.latin)}</div><div>Email</div><div>${esc(c.email)}</div><div>Телефон</div><div>${esc(c.phone)}</div><div>Город</div><div>${esc(c.city)}</div><div>Пригласил</div><div>${c.referrer || '—'}</div><div>Каналы</div><div class="small">${Object.entries(c.channels || {}).filter(([, v]) => v).map(([k]) => CHANNEL_NAME[k]).join(', ') || '—'}</div></div></div>
-    <div class="card"><h3>Баланс: ${usd(c.balance)}</h3><form data-form="ad-adjust"><input type="hidden" name="id" value="${c.id}"><div class="inline-inputs"><label class="field"><span>Сумма ±$</span><input name="amount" type="number" step="0.01" required placeholder="+10 / -5"></label></div>
-      <label class="field"><span>Причина</span><input name="note" required placeholder="Компенсация за задержку"></label><button class="btn">Корректировка</button></form></div>
-    <div class="card"><h3>Уровень и доступ</h3><form data-form="ad-level"><input type="hidden" name="id" value="${c.id}"><label class="field"><span>Уровень (ручной)</span><select name="level">${DB.levels.map(l => `<option value="${l.id}" ${l.id === c.level ? 'selected' : ''}>${l.name}</option>`).join('')}</select></label><button class="btn secondary">Сохранить</button></form>
+  <div class="grid g3 mb"><div class="card">${clientChip(c.id)}<div class="kv mt"><div>Латиницей</div><div>${esc(c.latin)}</div><div>Email</div><div>${esc(c.email)}</div><div>Телефон</div><div>${esc(c.phone)}</div><div>Город</div><div>${esc(c.city)}</div><div>Каналы</div><div class="small">${Object.entries(c.channels || {}).filter(([, v]) => v).map(([k]) => CHANNEL_NAME[k]).join(', ') || '—'}</div></div></div>
+    <div class="card"><div class="stat"><span class="l">Оплачено всего</span><span class="v">${usd(paidTotal(c.id))}</span><span class="muted small">${kzt(paidTotal(c.id))} · платежей: ${pays.length}</span></div></div>
+    <div class="card"><h3>Доступ</h3><p class="muted small">Заблокированный клиент не может войти в кабинет; посылки на складе сохраняются.</p>
       <button class="btn ${c.blocked ? 'success' : 'danger'} sm mt" data-action="ad-block" data-id="${c.id}">${c.blocked ? 'Разблокировать' : 'Заблокировать'}</button></div></div>
   <div class="grid g2"><div class="card pad-0"><div style="padding:16px 16px 0"><h3>Посылки (${ps.length})</h3></div><table class="t"><tbody>${ps.map(p => `<tr><td>${p.id}</td><td class="small">${esc(p.store)}</td><td>${badge(p.status)}</td></tr>`).join('')}</tbody></table></div>
-    <div class="card pad-0"><div style="padding:16px 16px 0"><h3>Операции</h3></div><table class="t"><tbody>${tx.map(x => `<tr><td class="small nowrap">${fdate(x.date)}</td><td class="small">${esc(x.note)}</td><td class="right"><b>${x.amount > 0 ? '+' : ''}${usd(x.amount)}</b></td></tr>`).join('')}</tbody></table></div></div>`;
+    <div class="card pad-0"><div style="padding:16px 16px 0"><h3>Платежи</h3></div><table class="t"><tbody>${pays.map(x => `<tr><td class="small nowrap">${fdate(x.date)}</td><td class="small">${esc(x.note)}<br><span class="muted">${esc(x.method || '')}</span></td><td class="right"><b>${usd(x.amount)}</b></td></tr>`).join('') || `<tr><td class="muted center">Платежей пока нет</td></tr>`}</tbody></table></div></div>`;
 };
-F['ad-adjust'] = d => {
-  const amt = +d.amount;
-  if (!amt) return;
-  addTx(d.id, amt > 0 ? 'adjust' : 'adjust', amt, 'Корректировка: ' + d.note);
-  notify(d.id, `Баланс скорректирован на ${amt > 0 ? '+' : ''}${usd(amt)}: ${d.note}`);
-  logAction('admin', `Ручная корректировка баланса ${d.id}: ${amt > 0 ? '+' : ''}${usd(amt)} (${d.note})`);
-  Store.save(); render(); toast('Баланс изменён', 'ok');
-};
-F['ad-level'] = d => { const c = clientById(d.id); logAction('admin', `Уровень ${c.id}: ${c.level} → ${d.level}`); c.level = d.level; Store.save(); render(); toast('Сохранено', 'ok'); };
+const paidTotal = clientId => DB.payments.filter(x => x.clientId === clientId).reduce((sum, x) => sum + x.amount, 0);
 A['ad-block'] = el => { const c = clientById(el.dataset.id); c.blocked = !c.blocked; logAction('admin', `${c.blocked ? 'Блокировка' : 'Разблокировка'} ${c.id}`); Store.save(); render(); };
 A['ad-impersonate'] = el => { DB.session.clientId = el.dataset.id; logAction('admin', 'Вход в кабинет клиента ' + el.dataset.id); Store.save(); location.hash = '#/client'; };
 
@@ -186,7 +177,7 @@ A['ad-courier-send'] = el => {
 A['ad-courier-done'] = el => {
   const r = byId(DB.courierRequests, el.dataset.id);
   r.status = 'done';
-  r.parcelIds.map(parcelById).filter(Boolean).forEach(p => { setParcelStatus(p, 'delivered', 'Доставлена курьером'); const c = clientById(p.clientId); c.shippedKg = Math.round((c.shippedKg + p.weight) * 10) / 10; c.level = levelForKg(c.shippedKg).id; });
+  r.parcelIds.map(parcelById).filter(Boolean).forEach(p => { setParcelStatus(p, 'delivered', 'Доставлена курьером'); });
   DB.integrationLog = DB.integrationLog || [];
   DB.integrationLog.unshift({ date: new Date().toISOString(), svc: 'Курьерская служба', dir: '←', text: `webhook order.delivered ${r.extId}` });
   notify(r.clientId, `Посылка доставлена курьером. Спасибо!`);
@@ -197,33 +188,30 @@ A['ad-courier-done'] = el => {
 /* ---------- Тарифы ---------- */
 AD.tariffs = () => {
   const st = DB.settings;
-  return `${pageHead(`${ic('badge-dollar-sign')} Тарифы, уровни, курсы`)}
+  return `${pageHead(`${ic('badge-dollar-sign')} Тарифы и курсы`)}
   <form data-form="ad-tariffs">
-  <div class="card pad-0 table-wrap mb"><table class="t"><thead><tr><th>Страна</th>${DB.levels.map(l => `<th>${l.name}, $/кг</th>`).join('')}<th>Мин., $</th><th>Срок</th></tr></thead><tbody>
-    ${DB.countries.map(c => `<tr><td><b>${flag(c.code)} ${esc(c.name)}</b>${c.active ? '' : ' <span class="badge">выкл.</span>'}</td>${DB.levels.map(l => `<td><input name="t_${c.code}_${l.id}" type="number" step="0.1" value="${c.perKg[l.id]}" style="width:84px"></td>`).join('')}<td><input name="m_${c.code}" type="number" step="0.5" value="${c.minCharge}" style="width:70px"></td><td><input name="tr_${c.code}" value="${esc(c.transit)}" style="width:110px"></td></tr>`).join('')}
+  <div class="card pad-0 table-wrap mb"><table class="t"><thead><tr><th>Страна</th><th>Цена, $/кг</th><th>≈ ₸/кг</th><th>Мин., $</th><th>Срок</th></tr></thead><tbody>
+    ${DB.countries.map(c => `<tr><td><b>${flag(c.code)} ${esc(c.name)}</b>${c.active ? '' : ' <span class="badge">выкл.</span>'}</td><td><input name="t_${c.code}" type="number" step="0.1" min="0" value="${c.perKg}" style="width:96px"></td><td class="muted small nowrap">${kzt(c.perKg)}</td><td><input name="m_${c.code}" type="number" step="0.5" value="${c.minCharge}" style="width:70px"></td><td><input name="tr_${c.code}" value="${esc(c.transit)}" style="width:110px"></td></tr>`).join('')}
   </tbody></table></div>
-  <div class="grid g3 mb">
-    <div class="card"><h3>Уровни лояльности</h3>${DB.levels.map(l => `<label class="field"><span>${l.name} — порог, кг</span><input name="lv_${l.id}" type="number" value="${l.fromKg}" ${l.fromKg === 0 ? 'readonly' : ''}></label>`).join('')}</div>
+  <div class="grid g2 mb">
     <div class="card"><h3>Курсы валют (за 1 USD)</h3>${Object.entries(st.rates).map(([k, v]) => `<label class="field"><span>${k}</span><input name="r_${k}" type="number" step="0.01" value="${v}"></label>`).join('')}<button type="button" class="btn ghost sm" data-action="ad-rates-sync">${ic('refresh-cw')} Загрузить курс НБ РК</button></div>
     <div class="card"><h3>Доставка и хранение</h3>
       <label class="field"><span>Курьер по городу, $</span><input name="courierPrice" type="number" step="0.5" value="${st.courierPrice}"></label>
       <label class="field"><span>Бесплатный курьер от, $</span><input name="freeCourierFrom" type="number" value="${st.freeCourierFrom}"></label>
       <label class="field"><span>Бесплатное хранение, дней</span><input name="storageFreeDays" type="number" value="${st.storageFreeDays}"></label>
       <label class="field"><span>Платное хранение, $/день</span><input name="storageFeePerDay" type="number" step="0.05" value="${st.storageFeePerDay}"></label>
-      <label class="field"><span>Делитель объёмного веса</span><input name="volumetricDivider" type="number" value="${st.volumetricDivider}"></label>
-      <label class="field"><span>Реферальный бонус, $</span><input name="referralBonus" type="number" value="${st.referralBonus}"></label></div>
+      <label class="field"><span>Делитель объёмного веса</span><input name="volumetricDivider" type="number" value="${st.volumetricDivider}"></label></div>
   </div><button class="btn lg">${ic('save')} Сохранить все изменения</button></form>`;
 };
 A['ad-rates-sync'] = () => { const v = (500 + Math.random() * 12).toFixed(2); $('input[name=r_KZT]').value = v; toast(`Курс НБ РК на ${fdate(new Date())}: 1 USD = ${v} ₸ (демо)`); };
 F['ad-tariffs'] = d => {
   const changes = [];
   DB.countries.forEach(c => {
-    DB.levels.forEach(l => { const v = +d[`t_${c.code}_${l.id}`]; if (v !== c.perKg[l.id]) { changes.push(`${c.code}/${l.name}: ${c.perKg[l.id]}→${v}`); c.perKg[l.id] = v; } });
+    const v = +d['t_' + c.code]; if (v !== c.perKg) { changes.push(`${c.code}: $${c.perKg}→$${v}/кг`); c.perKg = v; }
     c.minCharge = +d['m_' + c.code]; c.transit = d['tr_' + c.code];
   });
-  DB.levels.forEach(l => l.fromKg = +d['lv_' + l.id]);
   Object.keys(DB.settings.rates).forEach(k => { const v = +d['r_' + k]; if (v !== DB.settings.rates[k]) changes.push(`курс ${k}: ${DB.settings.rates[k]}→${v}`); DB.settings.rates[k] = v; });
-  ['courierPrice', 'freeCourierFrom', 'storageFreeDays', 'storageFeePerDay', 'volumetricDivider', 'referralBonus'].forEach(k => DB.settings[k] = +d[k]);
+  ['courierPrice', 'freeCourierFrom', 'storageFreeDays', 'storageFeePerDay', 'volumetricDivider'].forEach(k => DB.settings[k] = +d[k]);
   logAction('admin', 'Обновлены тарифы и настройки' + (changes.length ? ': ' + changes.slice(0, 6).join(', ') : ''));
   Store.save(); render(); toast('Тарифы сохранены — на сайте уже показаны новые цены', 'ok');
 };
@@ -231,27 +219,25 @@ F['ad-tariffs'] = d => {
 /* ---------- Страны ---------- */
 AD.countries = () => `${pageHead(`${ic('globe')} Страны и адреса складов`, '', `<button class="btn" data-action="ad-country-edit">${ic('plus')} Добавить страну</button>`)}
   <div class="grid g3">${DB.countries.map(c => `<div class="card"><div class="row between"><h3 style="margin:0">${flag(c.code)} ${esc(c.name)}</h3><label class="check small"><input type="checkbox" data-change="ad-country-toggle" data-code="${c.code}" ${c.active ? 'checked' : ''}> Активна</label></div>
-    <div class="small muted mt-s">${esc(c.address.line1)}, ${esc(c.address.city)} ${esc(c.address.zip)}<br>${esc(c.address.phone)}</div><div class="small mt-s">${c.transit} · от $${c.perKg.base}/кг</div>
+    <div class="small muted mt-s">${esc(c.address.line1)}, ${esc(c.address.city)} ${esc(c.address.zip)}<br>${esc(c.address.phone)}</div><div class="small mt-s">${c.transit} · $${c.perKg}/кг</div>
     <button class="btn ghost sm mt-s" data-action="ad-country-edit" data-code="${c.code}">Редактировать</button></div>`).join('')}</div>
   <p class="muted small mt">Включённая страна сразу появляется у клиентов в «Мои адреса», в тарифах на сайте, каталоге и на складе.</p>`;
 CH['ad-country-toggle'] = el => { const c = countryBy(el.dataset.code); c.active = el.checked; logAction('admin', `Страна ${c.name}: ${c.active ? 'включена' : 'выключена'}`); Store.save(); toast(`${flag(c.code)} ${c.name} ${c.active ? 'включена' : 'выключена'}`); };
 A['ad-country-edit'] = el => {
-  const c = countryBy(el.dataset.code) || { code: '', name: '', flag: '', transit: '7–12 дней', minCharge: 5, perKg: { base: 9, silver: 8.5, gold: 8, platinum: 7.5 }, address: { line1: '', line2: '{ID}', city: '', region: '', zip: '', phone: '' } };
+  const c = countryBy(el.dataset.code) || { code: '', name: '', flag: '', transit: '7–12 дней', minCharge: 5, perKg: 9, address: { line1: '', line2: '{ID}', city: '', region: '', zip: '', phone: '' } };
   const a = c.address;
   openModal(c.code ? 'Редактирование: ' + c.name : 'Новая страна', `<form data-form="ad-country-save"><input type="hidden" name="orig" value="${c.code}">
     <div class="grid g3"><label class="field"><span>Код ISO</span><input name="code" value="${c.code}" required maxlength="2" ${c.code ? 'readonly' : ''} placeholder="IT"></label><label class="field"><span>Название</span><input name="name" value="${esc(c.name)}" required placeholder="Италия"></label></div>
     <label class="field"><span>Address line 1</span><input name="line1" value="${esc(a.line1)}" required></label><label class="field"><span>Address line 2 ({ID} заменится на код клиента)</span><input name="line2" value="${esc(a.line2)}"></label>
     <div class="grid g3"><label class="field"><span>Город</span><input name="city" value="${esc(a.city)}"></label><label class="field"><span>Регион</span><input name="region" value="${esc(a.region)}"></label><label class="field"><span>Индекс</span><input name="zip" value="${esc(a.zip)}"></label></div>
-    <div class="grid g3"><label class="field"><span>Телефон</span><input name="phone" value="${esc(a.phone)}"></label><label class="field"><span>Срок доставки</span><input name="transit" value="${esc(c.transit)}"></label><label class="field"><span>Тариф Base, $/кг</span><input name="base" type="number" step="0.1" value="${c.perKg.base}"></label></div>
+    <div class="grid g3"><label class="field"><span>Телефон</span><input name="phone" value="${esc(a.phone)}"></label><label class="field"><span>Срок доставки</span><input name="transit" value="${esc(c.transit)}"></label><label class="field"><span>Тариф, $/кг</span><input name="perKg" type="number" step="0.1" min="0" value="${c.perKg}"></label></div>
     <button class="btn block">Сохранить</button></form>`, { wide: true });
 };
 F['ad-country-save'] = d => {
   const code = d.code.toUpperCase();
   let c = countryBy(d.orig);
-  if (!c) { if (countryBy(code)) return toast('Страна уже есть', 'err'); c = { code, active: true, minCharge: 5, perKg: {} }; DB.countries.push(c); }
-  const base = +d.base;
-  Object.assign(c, { name: d.name, transit: d.transit, address: { line1: d.line1, line2: d.line2 || '{ID}', city: d.city, region: d.region, zip: d.zip, phone: d.phone } });
-  if (!d.orig || c.perKg.base !== base) c.perKg = { base, silver: +(base * 0.95).toFixed(1), gold: +(base * 0.9).toFixed(1), platinum: +(base * 0.85).toFixed(1) };
+  if (!c) { if (countryBy(code)) return toast('Страна уже есть', 'err'); c = { code, active: true, minCharge: 5, perKg: 0 }; DB.countries.push(c); }
+  Object.assign(c, { name: d.name, transit: d.transit, perKg: +d.perKg, address: { line1: d.line1, line2: d.line2 || '{ID}', city: d.city, region: d.region, zip: d.zip, phone: d.phone } });
   logAction('admin', `${d.orig ? 'Изменена' : 'Добавлена'} страна ${c.name} (${code})`);
   Store.save(); closeModal(); render(); toast('Сохранено', 'ok');
 };
@@ -296,15 +282,15 @@ AD.reports = () => {
   <div class="grid g2 mb"><div class="card"><h3>Воронка клиентов</h3>${funnel()}</div><div class="card"><h3>Вес по странам</h3>${weightByCountry()}</div></div>
   <div class="card pad-0 table-wrap"><table class="t"><thead><tr><th>Месяц</th><th class="right">Оборот</th><th class="right">Вес, кг</th><th class="right">Посылок</th><th class="right">Прибыль</th><th class="right">Маржа</th></tr></thead><tbody>
     ${s.map(x => `<tr><td>${x.label}</td><td class="right">${usd(x.revenue)}</td><td class="right">${x.weight}</td><td class="right">${x.parcels}</td><td class="right">${usd(x.profit)}</td><td class="right">${((x.profit / x.revenue) * 100).toFixed(1)}%</td></tr>`).join('')}</tbody></table></div>
-  <div class="row mt"><button class="btn secondary" data-action="export-xlsx" data-what="parcels">Посылки XLSX</button><button class="btn secondary" data-action="export-xlsx" data-what="clients">Клиенты XLSX</button><button class="btn secondary" data-action="export-xlsx" data-what="transactions">Финансы XLSX</button><button class="btn secondary" data-action="export-xlsx" data-what="log">Журнал XLSX</button></div>`;
+  <div class="row mt"><button class="btn secondary" data-action="export-xlsx" data-what="parcels">Посылки XLSX</button><button class="btn secondary" data-action="export-xlsx" data-what="clients">Клиенты XLSX</button><button class="btn secondary" data-action="export-xlsx" data-what="payments">Платежи XLSX</button><button class="btn secondary" data-action="export-xlsx" data-what="log">Журнал XLSX</button></div>`;
 };
 A['export-xlsx'] = async el => {
   const what = el.dataset.what;
   const sheets = {
     parcels: () => DB.parcels.map(p => ({ 'Посылка': p.id, 'Трек': p.track, 'Магазин': p.store, 'Клиент': p.clientId || '', 'Страна': p.country, 'Статус': STATUS[p.status]?.label, 'Вес, кг': p.weight, 'Стоимость, $': parcelCost(p) || '', 'Оплачено': p.paid ? 'да' : 'нет', 'Партия': p.batchId || '', 'Ячейка': p.cell || '', 'Создана': fdate(p.createdAt) })),
     stock: () => whParcels().filter(p => ['received', 'consolidating', 'ready', 'unidentified'].includes(p.status)).map(p => ({ 'Ячейка': p.cell, 'Посылка': p.id, 'Трек': p.track, 'Клиент': p.clientId || '', 'Вес': p.weight, 'Статус': STATUS[p.status].label, 'Дней': storageDays(p) })),
-    clients: () => DB.clients.map(c => ({ 'ID': c.id, 'Имя': c.name, 'Латиницей': c.latin, 'Email': c.email, 'Телефон': c.phone, 'Город': c.city, 'Уровень': levelOf(c).name, 'Отправлено, кг': c.shippedKg, 'Баланс, $': c.balance, 'Регистрация': fdate(c.createdAt) })),
-    transactions: () => DB.transactions.map(x => ({ 'ID': x.id, 'Дата': fdt(x.date), 'Клиент': x.clientId, 'Тип': TX_TYPE[x.type][0], 'Сумма, $': x.amount, 'Способ': x.method || '', 'Описание': x.note })),
+    clients: () => DB.clients.map(c => ({ 'ID': c.id, 'Имя': c.name, 'Латиницей': c.latin, 'Email': c.email, 'Телефон': c.phone, 'Город': c.city, 'Посылок': DB.parcels.filter(p => p.clientId === c.id).length, 'Оплачено, $': Math.round(paidTotal(c.id) * 100) / 100, 'Регистрация': fdate(c.createdAt) })),
+    payments: () => DB.payments.map(x => ({ 'ID': x.id, 'Дата': fdt(x.date), 'Клиент': x.clientId, 'Назначение': x.note, 'Сумма, $': x.amount, 'Сумма, ₸': Math.round(x.amount * DB.settings.rates.KZT), 'Способ': x.method || '' })),
     buyouts: () => DB.buyouts.map(b => ({ 'Заявка': b.id, 'Клиент': b.clientId, 'Страна': b.country, 'Товары': b.items.map(i => i.title).join('; '), 'Сумма, $': b.total || '', 'Комиссия, $': b.total ? buyoutCalc(b).commission : '', 'Статус': BUYOUT_STATUS[b.status].label, 'Заказ': b.orderNo || '', 'Трек': b.track || '' })),
     log: () => DB.log.map(l => ({ 'Дата': fdt(l.date), 'Роль': l.role, 'Пользователь': l.user, 'Действие': l.text })),
     report: () => monthlySeries().map(x => ({ 'Месяц': x.label, 'Оборот, $': x.revenue, 'Вес, кг': x.weight, 'Посылок': x.parcels, 'Прибыль, $': x.profit })),
@@ -315,7 +301,7 @@ A['export-xlsx'] = async el => {
     await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), what.slice(0, 30));
-    if (what === 'report') XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheets.transactions()), 'transactions');
+    if (what === 'report') XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheets.payments()), 'payments');
     XLSX.writeFile(wb, name + '.xlsx');
   } catch {
     const keys = Object.keys(rows[0] || {});

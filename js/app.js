@@ -48,7 +48,6 @@ function render() {
     case 'track': html = Site.track(q); title = 'Отслеживание · Way'; break;
     default:
       html = Site.home();
-      if (q.get('ref') && !clientById(DB.session.clientId)) onMount(() => authModal('register'));
   }
   const isSite = roleKey === 'site';
   $('#app').innerHTML = roleBar(roleKey) + html + (isSite ? cookieBanner() : '');
@@ -91,7 +90,7 @@ A['scenarios'] = () => openModal(`${ic('clapperboard')} Сценарии для 
     ['3. OCR: посылка без предзаявки', 'Склад → OCR этикетки → демо-этикетки «С ID-кодом», «Без ID — только имя», «Имя с ошибкой», «Неизвестный»', '#/warehouse/ocr'],
     ['4. Нераспознанные', 'Склад → Нераспознанные: подсказки владельца по имени с этикетки, ручная привязка', '#/warehouse/unidentified'],
     ['5. Консолидация', 'Клиент → Посылки → отметить P-1002 и P-1003 → Объединить. Затем Склад → Заявки на услуги → Выполнить', '#/client/parcels?g=stock'],
-    ['6. Оплата и отправка', 'Клиент → Кошелёк (Kaspi/карта) → оплатить доставку. Склад → Партии → сформировать → провести по статусам до «Выдача»', '#/client/wallet'],
+    ['6. Оплата и отправка', 'Клиент → Посылки → «Оплатить» (Kaspi Pay или карта). Склад → Партии → сформировать → провести по статусам до «Выдача»', '#/client/wallet'],
     ['7. Купи вместо меня', 'Клиент создаёт заявку → Менеджер выкупа выставляет счёт → клиент платит → менеджер выкупает и указывает трек → склад принимает', '#/buyout'],
     ['8. Выдача', 'Склад → Выдача → WY-10427 → Выдать (код в кабинете клиента)', '#/warehouse/issue?c=WY-10427'],
     ['9. Админка', 'Тарифы и курсы (сразу меняются на сайте), страны, клиенты с корректировкой баланса, отчёты с экспортом XLSX, журнал действий', '#/admin'],
@@ -100,5 +99,10 @@ A['scenarios'] = () => openModal(`${ic('clapperboard')} Сценарии для 
 /* ---------- Старт ---------- */
 Store.load();
 render();
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+// Service Worker: всегда проверяем свежий sw.js; когда новая версия берёт управление — один раз перезагружаем страницу
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !window.__swReloaded) { window.__swReloaded = true; location.reload(); } });
+}
 try { if (localStorage.getItem('qazbox-cookie') === 'all') loadAnalytics(); } catch {}

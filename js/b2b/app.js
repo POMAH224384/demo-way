@@ -74,3 +74,9 @@ A['b2b-scenarios'] = () => openModal(`${ic('clapperboard')} Сценарии B2B
 
 B2BStore.load();
 render();
+// Service Worker: всегда проверяем свежий sw.js; когда новая версия берёт управление — один раз перезагружаем страницу
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !window.__swReloaded) { window.__swReloaded = true; location.reload(); } });
+}

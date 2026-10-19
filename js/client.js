@@ -15,21 +15,17 @@ Client.render = (parts, q) => {
     { key: 'parcels', icon: ic('package'), label: t('c_parcels'), short: t('c_parcels'), count: toPay },
     { key: 'addresses', icon: ic('map-pin'), label: t('c_addresses'), short: 'Адреса' },
     { key: 'buyout', icon: ic('shopping-bag'), label: t('c_buyout'), short: 'Выкуп', count: invoices },
-    { key: 'wallet', icon: ic('credit-card'), label: t('c_wallet'), short: t('c_wallet') },
     { key: 'delivery', icon: ic('truck'), label: t('c_delivery') },
-    { key: 'loyalty', icon: ic('gift'), label: t('c_loyalty') },
     { key: 'support', icon: ic('message-circle'), label: t('c_support') },
     { key: 'notifications', icon: ic('bell'), label: 'Уведомления', count: unread },
     { key: 'settings', icon: ic('settings'), label: t('c_settings') },
   ];
   const pages = { dashboard: Client.dashboard, welcome: Client.welcome, addresses: Client.addresses, parcels: Client.parcels, parcel: Client.parcel, buyout: Client.buyout,
-    wallet: Client.wallet, delivery: Client.delivery, loyalty: Client.loyalty, support: Client.support, notifications: Client.notifications, settings: Client.settings, more: Client.more };
+    delivery: Client.delivery, support: Client.support, notifications: Client.notifications, settings: Client.settings, more: Client.more };
   const content = (pages[page] || Client.dashboard)(parts.slice(1), q, c);
-  const lvl = levelOf(c);
-  const userCard = `<div class="user-card"><div class="row nowrap">${avatar(c.name)}<div class="grow"><b class="small">${esc(c.name)}</b><div class="muted small mono">${c.id} · <span style="color:${lvl.color}">${lvl.name}</span></div></div></div>
-    <div class="row between mt-s small"><span class="muted">Баланс</span><b>${usd(c.balance)}</b></div>
+  const userCard = `<div class="user-card"><div class="row nowrap">${avatar(c.name)}<div class="grow"><b class="small">${esc(c.name)}</b><div class="muted small mono">${c.id}</div></div></div>
     <button class="btn ghost sm block mt-s" data-action="logout">Выйти</button></div>`;
-  const mobileNav = [nav[0], nav[1], nav[3], nav[4], { key: 'more', icon: ic('menu'), short: t('c_more') }];
+  const mobileNav = [nav[0], nav[1], nav[3], nav[2], { key: 'more', icon: ic('menu'), short: t('c_more') }];
   const mobileRight = `<div class="row nowrap" style="gap:4px"><a class="icon-btn bell" href="#/client/notifications" style="font-size:20px">${ic('bell')}${unread ? `<span class="cnt">${unread}</span>` : ''}</a></div>`;
   const cur = page === 'parcel' ? 'parcels' : page;
   return cabinetLayout({ area: 'client', brandSub: 'Личный кабинет', nav, current: cur, content, userCard, mobileNav, mobileRight });
@@ -41,7 +37,7 @@ Client.loginGate = () => `${siteHeader('')}<div class="container" style="padding
 A['demo-login'] = () => { DB.session.clientId = 'WY-10427'; Store.save(); render(); };
 A['logout'] = () => { DB.session.clientId = null; Store.save(); location.hash = '#/'; toast('Вы вышли из кабинета'); };
 
-Client.more = () => `${pageHead('Ещё')}<div class="card pad-0">${[['addresses', ic('map-pin'), t('c_addresses')], ['delivery', ic('truck'), t('c_delivery')], ['loyalty', ic('gift'), t('c_loyalty')], ['support', ic('message-circle'), t('c_support')], ['notifications', ic('bell'), 'Уведомления'], ['settings', ic('settings'), t('c_settings')]]
+Client.more = () => `${pageHead('Ещё')}<div class="card pad-0">${[['addresses', ic('map-pin'), t('c_addresses')], ['delivery', ic('truck'), t('c_delivery')], ['support', ic('message-circle'), t('c_support')], ['notifications', ic('bell'), 'Уведомления'], ['settings', ic('settings'), t('c_settings')]]
   .map(([k, i, l]) => `<a class="parcel-item" href="#/client/${k}" style="color:inherit;text-decoration:none"><span class="icon-tile" style="width:36px;height:36px;font-size:18px">${i}</span><b class="grow">${l}</b><span class="muted">${ic('chevron-right')}</span></a>`).join('')}
   <a class="parcel-item" data-action="logout" style="color:var(--red)"><span class="icon-tile" style="width:36px;height:36px;font-size:18px;background:var(--red-50);color:var(--red)">${ic('log-out')}</span><b class="grow">Выйти</b></a></div>
   <div class="row mt">${langSwitch()}</div>`;
@@ -53,7 +49,7 @@ Client.welcome = (_, __, c) => `${pageHead(`Добро пожаловать! ${i
     <div class="card mt"><h3>Что дальше?</h3><ol class="muted" style="padding-left:18px;line-height:2">
       <li>Откройте <a href="#/client/addresses">адрес склада</a> нужной страны и оформите заказ в магазине.</li>
       <li><a href="#/client/parcels/new">Добавьте трек-номер</a> — мы привяжем посылку автоматически.</li>
-      <li><a href="#/client/wallet">Пополните кошелёк</a> через Kaspi или картой.</li>
+      <li>Когда посылка придёт на склад, оплатите доставку онлайн — Kaspi Pay или картой.</li>
       <li>Получите посылку в <a href="#/client/delivery">пункте выдачи, постамате или у курьера</a>.</li></ol></div>
   </div><div class="card"><h3>${ic('bell-ring')} Подключите уведомления</h3><p class="muted">Узнавайте о поступлении и выдаче посылок мгновенно.</p><a class="btn block" href="#/client/settings">Настроить</a></div></div>`;
 
@@ -61,23 +57,22 @@ Client.welcome = (_, __, c) => `${pageHead(`Добро пожаловать! ${i
 Client.dashboard = (_, __, c) => {
   const ps = myParcels();
   const cnt = g => ps.filter(p => STATUS_GROUPS[g].st.includes(p.status)).length;
-  const lvl = levelOf(c), next = DB.levels[DB.levels.indexOf(lvl) + 1];
-  const pct = next ? Math.min(100, ((c.shippedKg - lvl.fromKg) / (next.fromKg - lvl.fromKg)) * 100) : 100;
   const notes = DB.notifications.filter(n => n.clientId === c.id).slice(0, 4);
   const toPay = ps.filter(p => p.status === 'received');
   const inv = DB.buyouts.filter(b => b.clientId === c.id && b.status === 'invoiced');
+  const due = toPay.reduce((s, p) => s + parcelTotalDue(p), 0) + inv.reduce((s, b) => s + b.total, 0);
+  const dl = c.defaultDelivery || { method: 'pickup', pointId: c.defaultPoint || 'PT-1' }, pt = pointById(dl.pointId);
   return `${pageHead(`Привет, ${esc(c.name.split(' ')[0])}! ${ic('hand')}`, '', `<a class="btn" href="#/client/parcels/new">${ic('plus')} Добавить посылку</a>`)}
   ${toPay.length ? `<div class="notice warn mb">${ic('lightbulb')} На складе ${toPay.length} посылк${toPay.length === 1 ? 'а ждёт' : 'и ждут'} оплаты доставки. <a href="#/client/parcels?g=stock">Оплатить →</a></div>` : ''}
   ${inv.length ? `<div class="notice mb">${ic('receipt')} Выставлен счёт на выкуп ${inv.map(b => `<a href="#/client/buyout/${b.id}">${b.id}</a>`).join(', ')}</div>` : ''}
   <div class="grid g3 mb">
     <div class="card id-card"><div class="small" style="opacity:.8">Персональный ID-код</div><div class="code">${c.id}</div>
       <div class="row mt-s">${copyBtn(c.id, `<span class="btn secondary sm">${ic('copy')} Копировать</span>`)}<a class="btn secondary sm" href="#/client/addresses">Адреса складов</a></div></div>
-    <div class="card"><div class="stat"><span class="l">Баланс кошелька</span><span class="v">${usd(c.balance)}</span><span class="muted small">≈ ${kzt(c.balance)} · бонусы $${c.bonus}</span></div>
-      <a class="btn block mt" href="#/client/wallet?topup=1">Пополнить</a></div>
-    <div class="card"><div class="row between"><span class="muted">Уровень</span><span class="badge" style="background:${lvl.color};color:#fff">${lvl.name}</span></div>
-      <div class="stat mt-s"><span class="v">${kg(c.shippedKg)}</span><span class="l">отправлено всего</span></div>
-      <div class="progress mt-s"><div style="width:${pct}%"></div></div>
-      <div class="muted small mt-s">${next ? `До ${next.name}: ${kg(next.fromKg - c.shippedKg)}` : 'Максимальный уровень'} · ${esc(lvl.perks)}</div></div>
+    <div class="card"><div class="stat"><span class="l">К оплате</span><span class="v">${due ? kzt(due) : '0 ₸'}</span><span class="muted small">${due ? `${usd(due)} · посылок: ${toPay.length}, счетов выкупа: ${inv.length}` : 'Всё оплачено'}</span></div>
+      ${due ? `<a class="btn accent block mt" href="${toPay.length ? '#/client/parcels?g=stock' : '#/client/buyout/' + inv[0].id}">Перейти к оплате</a>` : `<p class="muted small mt">Оплата онлайн: Kaspi Pay или картой</p>`}</div>
+    <div class="card"><div class="row between"><span class="muted">Получение по умолчанию</span><a class="small" href="#/client/delivery">Изменить</a></div>
+      ${dl.method === 'courier' ? `<div class="stat mt-s"><span class="v" style="font-size:20px">${ic('truck')} Курьер</span><span class="muted small">${esc(dl.address || '')}</span></div>`
+        : `<div class="stat mt-s"><span class="v" style="font-size:20px">${pt?.type === 'locker' ? ic('archive') + ' Постамат' : ic('store') + ' Пункт выдачи'}</span><span class="muted small">${esc(pt?.city || '')}, ${esc(pt?.address || '')}</span></div>`}</div>
   </div>
   <div class="grid g4 mb">${['expected', 'stock', 'way', 'issue'].map(g => `<a class="card" href="#/client/parcels?g=${g}" style="text-decoration:none;color:inherit"><div class="stat"><span class="v">${cnt(g)}</span><span class="l">${STATUS_GROUPS[g].label}</span></div></a>`).join('')}</div>
   <div class="grid g-side">
@@ -120,7 +115,7 @@ Client.addresses = (_, q, c) => {
     <button class="btn secondary mt-s" data-action="copy" data-text="${esc([c.latin, a.line1, a.line2.replace('{ID}', c.id), a.city, a.region, a.zip, a.phone].join(', '))}">${ic('copy')} Скопировать адрес целиком</button>
   </div><div>
     <div class="notice warn">${ic('triangle-alert')} Обязательно укажите <b>${c.id}</b> в Address line 2. Без кода посылка может попасть в «нераспознанные» — тогда мы найдём вас по имени с этикетки, но это займёт больше времени.</div>
-    <div class="card mt"><h4>Тариф ${esc(cur.name)}</h4><div class="kv"><div>Ваш уровень</div><div>${levelOf(c).name}</div><div>Цена за кг</div><div><b>$${cur.perKg[c.level]}</b></div><div>Минимум</div><div>$${cur.minCharge}</div><div>Срок</div><div>${cur.transit}</div></div>
+    <div class="card mt"><h4>Тариф ${esc(cur.name)}</h4><div class="kv"><div>Цена за кг</div><div><b>$${cur.perKg}</b> <span class="muted small">≈ ${kzt(cur.perKg)}</span></div><div>Минимум</div><div>$${cur.minCharge}</div><div>Срок</div><div>${cur.transit}</div></div>
     <a class="btn ghost sm mt-s" href="#/stores">Магазины ${flag(cur.code)} →</a></div>
   </div></div>`;
 };
@@ -144,23 +139,30 @@ A['consolidate'] = () => {
   const ps = ids.map(parcelById);
   openModal(`${ic('combine')} Консолидация посылок`, `<p>Объединим <b>${ids.length}</b> посылки в одну коробку на складе ${flag(ps[0].country)}.</p>
     <div class="kv mb"><div>Посылки</div><div>${ids.join(', ')}</div><div>Сумма весов</div><div>${kg(ps.reduce((s, p) => s + p.weight, 0))}</div>
-    <div>Сейчас к оплате</div><div>${usd(ps.reduce((s, p) => s + parcelCost(p), 0))}</div><div>Стоимость услуги</div><div>${usd(SERVICES.consolidation.price)}</div></div>
+    <div>Сейчас к оплате</div><div>${usd(ps.reduce((s, p) => s + parcelCost(p), 0))}</div><div>Стоимость услуги</div><div>${usd(SERVICES.consolidation.price)} <span class="muted small">— добавится к оплате доставки</span></div></div>
     <div class="notice ok mb">Обычно консолидация экономит 20–40%: убираем лишние коробки и платите один минимальный тариф.</div>
     <form data-form="consolidate"><input type="hidden" name="ids" value="${ids.join(',')}"><label class="field"><span>Комментарий для склада</span><textarea name="comment" placeholder="Например: выбросить коробки от обуви"></textarea></label>
-    <button class="btn block">Заказать за ${usd(SERVICES.consolidation.price)}</button></form>`);
+    <button class="btn block">Заказать консолидацию</button></form>`);
 };
 F['consolidate'] = d => orderService(d.ids.split(','), 'consolidation', d.comment);
 
+/* Услуги склада оплачиваются вместе с доставкой посылки. Возврат продавцу — сразу: посылка в Казахстан не поедет. */
 function orderService(ids, type, comment = '') {
   const c = me(), sv = SERVICES[type];
-  if (c.balance < sv.price) { toast(`Недостаточно средств: нужно ${usd(sv.price)}. Пополните кошелёк.`, 'err'); closeModal(); location.hash = '#/client/wallet?topup=1'; return; }
-  addTx(c.id, 'charge', -sv.price, `Услуга «${sv.name}» (${ids.join(', ')})`);
-  const sr = { id: nextId('SR-', 'sr'), clientId: c.id, parcelIds: ids, type, status: 'new', createdAt: new Date().toISOString(), price: sv.price, comment };
-  DB.serviceRequests.unshift(sr);
-  ids.forEach(id => { const p = parcelById(id); p.services.push({ type, srId: sr.id, status: 'new' }); if (type === 'consolidation') setParcelStatus(p, 'consolidating', 'Заказана консолидация ' + sr.id); });
-  logAction('client', `Заказана услуга «${sv.name}» ${sr.id} для ${ids.join(', ')}`);
+  const create = paid => {
+    const sr = { id: nextId('SR-', 'sr'), clientId: c.id, parcelIds: ids, type, status: 'new', createdAt: new Date().toISOString(), price: sv.price, comment, paid };
+    DB.serviceRequests.unshift(sr);
+    ids.forEach(id => { const p = parcelById(id); p.services.push({ type, srId: sr.id, status: 'new' }); if (type === 'consolidation') setParcelStatus(p, 'consolidating', 'Заказана консолидация ' + sr.id); });
+    logAction('client', `Заказана услуга «${sv.name}» ${sr.id} для ${ids.join(', ')}`);
+    return sr;
+  };
+  if (type === 'return') {
+    payOnline({ amount: sv.price, title: `Услуга «${sv.name}» (${ids.join(', ')})`, onPaid: () => create(true) });
+    return;
+  }
+  const sr = create(false);
   Store.save(); closeModal(); render();
-  toast(`${ic('circle-check')} Заявка ${sr.id} передана на склад`, 'ok');
+  toast(`Заявка ${sr.id} передана на склад. ${usd(sv.price)} добавится к оплате доставки`, 'ok');
 }
 
 Client.newParcel = (q, c) => `${pageHead('Новая посылка', '<a href="#/client/parcels">Посылки</a> / Добавить')}
@@ -174,7 +176,7 @@ Client.newParcel = (q, c) => `${pageHead('Новая посылка', '<a href="
     <label class="field mt"><span>Комментарий</span><textarea name="comment" placeholder="Необязательно"></textarea></label>
   </div><div>
     <div class="card"><h4>Сразу заказать услуги</h4>${Object.entries(SERVICES).filter(([k]) => !['consolidation', 'return'].includes(k)).map(([k, s]) => `<label class="check"><input type="checkbox" name="svc" value="${k}"> ${s.icon} ${s.name} <span class="muted">— ${usd(s.price)}</span></label>`).join('')}
-    <p class="muted small mt-s">Списываются при поступлении посылки на склад.</p></div>
+    <p class="muted small mt-s">Стоимость услуг добавится к оплате доставки.</p></div>
     <button class="btn block lg mt">Добавить посылку</button>
   </div></form>`;
 const declRow = () => `<div class="inline-inputs decl-row mb-s"><input name="iname" placeholder="Наименование" required style="flex:3"><input name="iqty" type="number" min="1" value="1" placeholder="Кол-во"><input name="iprice" type="number" min="0" step="0.01" placeholder="Цена $" required><button type="button" class="icon-btn" data-action="decl-del" style="flex:0">${ic('x')}</button></div>`;
@@ -204,12 +206,12 @@ F['new-parcel'] = (d, form) => {
 Client.parcel = ([id], q, c) => {
   const p = parcelById(id);
   if (!p || p.clientId !== c.id) return empty('Посылка не найдена', ic('search'));
-  const cost = parcelCost(p), extra = deliveryExtra(p);
+  const cost = parcelCost(p), extra = deliveryExtra(p), svcDue = serviceDue(p), total = (cost || 0) + extra + svcDue;
   const editable = ['expected', 'received', 'consolidating'].includes(p.status);
   const pt = pointById(p.delivery?.pointId);
   const srs = DB.serviceRequests.filter(s => s.parcelIds.includes(p.id));
   const children = DB.parcels.filter(x => x.mergedInto === p.id);
-  const calc = p.weight ? calcShipping(p.country, p.weight, p.dims, c.level) : null;
+  const calc = p.weight ? calcShipping(p.country, p.weight, p.dims) : null;
   return `${pageHead(`${flag(p.country)} ${esc(p.store)} · ${p.id}`, '<a href="#/client/parcels">Посылки</a> / ' + p.id, badge(p.status))}
   <div class="card mb">${stepper(p)}</div>
   ${p.status === 'received' ? `<div class="notice warn mb">${ic('credit-card')} Посылка на складе. Проверьте декларацию, выберите способ получения и оплатите доставку — мы отправим её в ближайшей партии.</div>` : ''}
@@ -227,9 +229,11 @@ Client.parcel = ([id], q, c) => {
       <tr><td colspan="2"><b>Итого</b></td><td class="right"><b>${usd(p.items.reduce((s, i) => s + i.price * i.qty, 0))}</b></td></tr></tbody></table>` : '<div class="notice warn">Заполните декларацию — без неё посылку нельзя отправить.</div>'}</div>
     <div class="card"><h3>История</h3>${timelineHtml(p)}</div>
   </div><div>
-    <div class="card mb"><h3>${ic('wallet')} Стоимость</h3>
-      ${cost ? `<div class="kv"><div>Доставка</div><div>${usd(cost)}${calc ? ` <span class="muted small">(${calc.chargeable} кг × $${calc.perKg})</span>` : ''}</div><div>Курьер</div><div>${p.delivery?.method === 'courier' ? (extra ? usd(extra) : 'бесплатно') : '—'}</div><div><b>Итого</b></div><div><b>${money(cost + extra)}</b></div></div>
-        ${p.paid ? `<div class="notice ok mt">${ic('circle-check')} Оплачено</div>` : p.status === 'received' ? `<button class="btn accent block lg mt" data-action="pay-parcel" data-id="${p.id}">Оплатить ${usd(cost + extra)}</button><div class="muted small mt-s center">С баланса кошелька (${usd(c.balance)})</div>` : ''}`
+    <div class="card mb"><h3>${ic('receipt')} Стоимость</h3>
+      ${cost ? `<div class="kv"><div>Доставка</div><div>${usd(cost)}${calc && !p.paid ? ` <span class="muted small">(${calc.chargeable} кг × $${calc.perKg})</span>` : ''}</div><div>Курьер</div><div>${p.delivery?.method === 'courier' ? (extra ? usd(extra) : 'бесплатно') : '—'}</div>
+        ${svcDue ? `<div>Услуги склада</div><div>${usd(svcDue)} <span class="muted small">(${serviceRequestsDue(p).map(x => SERVICES[x.type].name).join(', ')})</span></div>` : ''}
+        ${p.paid ? '' : `<div><b>Итого</b></div><div><b>${money(total)}</b></div>`}</div>
+        ${p.paid ? `<div class="notice ok mt">${ic('circle-check')} Оплачено${p.paidMethod ? ` · ${esc(p.paidMethod)}` : ''}</div>` : p.status === 'received' ? `<button class="btn accent block lg mt" data-action="pay-parcel" data-id="${p.id}">Оплатить ${kzt(total)}</button><div class="muted small mt-s center">Kaspi Pay или банковской картой</div>` : ''}`
         : '<p class="muted">Рассчитаем после взвешивания на складе.</p>'}
       ${storageDays(p) > DB.settings.storageFreeDays && !p.paid ? `<div class="notice err mt">Платное хранение: ${storageDays(p) - DB.settings.storageFreeDays} дн.</div>` : ''}
     </div>
@@ -246,23 +250,21 @@ Client.parcel = ([id], q, c) => {
 A['order-svc'] = el => {
   const s = SERVICES[el.dataset.type];
   openModal(`${s.icon} ${s.name}`, `<p>${s.desc}</p><form data-form="order-svc"><input type="hidden" name="id" value="${el.dataset.id}"><input type="hidden" name="type" value="${el.dataset.type}">
-    <label class="field"><span>Комментарий для склада</span><textarea name="comment"></textarea></label><button class="btn block">Заказать за ${usd(s.price)}</button></form>`);
+    <label class="field"><span>Комментарий для склада</span><textarea name="comment"></textarea></label>
+    <button class="btn block">${el.dataset.type === 'return' ? `Оплатить ${usd(s.price)} и заказать` : `Заказать — ${usd(s.price)} к оплате доставки`}</button></form>`);
 };
 F['order-svc'] = d => orderService([d.id], d.type, d.comment);
 A['pay-parcel'] = el => {
-  const p = parcelById(el.dataset.id), c = me();
+  const p = parcelById(el.dataset.id);
   if (!p.items.length) return toast('Сначала заполните декларацию', 'err');
   if (!p.delivery) return toast('Выберите способ получения', 'err');
-  const total = parcelCost(p) + deliveryExtra(p);
-  if (c.balance < total) {
-    openModal('Недостаточно средств', `<p>К оплате <b>${usd(total)}</b>, на балансе <b>${usd(c.balance)}</b>.</p><a class="btn block" href="#/client/wallet?topup=${Math.ceil(total - c.balance)}" data-action="modal-close">Пополнить на ${usd(Math.ceil(total - c.balance))}</a>`);
-    return;
-  }
-  p.cost = parcelCost(p); p.paid = true;
-  addTx(c.id, 'charge', -total, `Доставка ${p.id} (${p.store}, ${p.country})`);
-  setParcelStatus(p, 'ready', 'Доставка оплачена');
-  logAction('client', `Оплачена доставка ${p.id}: ${usd(total)}`);
-  Store.save(); render(); toast(`${ic('circle-check')} Оплачено! Посылка уйдёт в ближайшей партии.`, 'ok');
+  const dueSrs = serviceRequestsDue(p), total = parcelTotalDue(p);
+  payOnline({ amount: total, title: `Доставка ${p.id} (${p.store}, ${p.country})${dueSrs.length ? ' + услуги склада' : ''}`, onPaid: method => {
+    p.cost = parcelCost(p); p.paid = true; p.paidMethod = method;
+    dueSrs.forEach(x => x.paid = true);
+    setParcelStatus(p, 'ready', 'Доставка оплачена');
+    logAction('client', `Оплачена доставка ${p.id}: ${usd(total)} (${method})`);
+  } });
 };
 A['decl-edit'] = el => {
   const p = parcelById(el.dataset.id);
@@ -311,7 +313,7 @@ Client.newBuyout = q => `${pageHead('Новая заявка на выкуп', '
     <div id="by-rows">${buyRow(q.get('url') || '')}</div>
     <button type="button" class="btn ghost sm" data-action="by-add">${ic('plus')} Ещё товар</button>
     <label class="field mt"><span>Комментарий менеджеру</span><textarea name="comment" placeholder="Например: если нет размера M — не покупать"></textarea></label>
-  </div><div><div class="card"><h4>Как это работает</h4><ol class="muted small" style="padding-left:18px;line-height:1.9"><li>Менеджер проверит наличие и цену</li><li>Вы получите счёт и оплатите его с кошелька</li><li>Мы выкупим товар и укажем трек</li><li>Посылка придёт на ваш адрес склада автоматически</li></ol></div>
+  </div><div><div class="card"><h4>Как это работает</h4><ol class="muted small" style="padding-left:18px;line-height:1.9"><li>Менеджер проверит наличие и цену</li><li>Вы получите счёт и оплатите его онлайн — Kaspi Pay или картой</li><li>Мы выкупим товар и укажем трек</li><li>Посылка придёт на ваш адрес склада автоматически</li></ol></div>
   <button class="btn block lg mt">Отправить заявку</button></div></form>`;
 const buyRow = (url = '') => `<div class="card flat by-row mb-s" style="padding:12px;background:var(--surface-2)"><label class="field"><span>Ссылка на товар</span><input name="url" type="url" required value="${esc(url)}" placeholder="https://..."></label>
   <div class="inline-inputs"><input name="title" required placeholder="Название"><input name="params" placeholder="Размер, цвет"><input name="qty" type="number" min="1" value="1" style="max-width:80px"><input name="price" type="number" step="0.01" min="0" required placeholder="Цена $" style="max-width:110px"></div></div>`;
@@ -344,22 +346,22 @@ Client.buyoutDetail = (id, c) => {
   <div class="grid g-side"><div class="card pad-0 table-wrap"><table class="t"><thead><tr><th>Товар</th><th>Параметры</th><th>Кол-во</th><th class="right">Цена</th></tr></thead><tbody>
     ${b.items.map(i => `<tr><td><b>${esc(i.title)}</b><div class="small"><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.url.slice(0, 48))}…</a></div></td><td>${esc(i.params || '—')}</td><td>${i.qty}</td><td class="right">${usd(i.actual ?? i.price)}${i.actual != null && i.actual !== i.price ? `<div class="muted small"><s>${usd(i.price)}</s></div>` : ''}</td></tr>`).join('')}</tbody></table>
     ${b.comment ? `<div style="padding:12px 16px" class="muted small">${ic('message-circle')} ${esc(b.comment)}</div>` : ''}</div>
-  <div><div class="card"><h3>Счёт ${b.invoiceId ? `<span class="muted small">${b.invoiceId}</span>` : ''}</h3>
+  <div><div class="card"><div class="card-head"><h3>Счёт ${b.invoiceId ? `<span class="muted small">${b.invoiceId}</span>` : ''}</h3>${b.invoiceId && b.status !== 'cancelled' ? `<button class="btn ghost sm" data-action="invoice-pdf" data-id="${b.id}">${ic('printer')} PDF</button>` : ''}</div>
     ${b.status === 'new' ? '<p class="muted">Менеджер проверяет наличие и цены. Счёт появится здесь.</p>' : `<div class="kv"><div>Товары</div><div>${usd(k.goods)}</div><div>Доставка по стране</div><div>${usd(b.localShipping)}</div><div>Комиссия ${b.commissionPct}%</div><div>${usd(k.commission)}</div><div><b>Итого</b></div><div><b>${money(b.total)}</b></div></div>`}
-    ${b.status === 'invoiced' ? `<button class="btn accent block lg mt" data-action="pay-buyout" data-id="${b.id}">Оплатить ${usd(b.total)}</button><div class="muted small center mt-s">Баланс: ${usd(c.balance)}</div><button class="btn ghost sm block mt-s" data-action="cancel-buyout" data-id="${b.id}">Отменить заявку</button>` : ''}
+    ${b.status === 'invoiced' ? `<button class="btn accent block lg mt" data-action="pay-buyout" data-id="${b.id}">Оплатить ${kzt(b.total)}</button><div class="muted small center mt-s">Kaspi Pay или банковской картой</div><button class="btn ghost sm block mt-s" data-action="cancel-buyout" data-id="${b.id}">Отменить заявку</button>` : ''}
     ${b.status === 'new' ? `<button class="btn ghost sm block mt" data-action="cancel-buyout" data-id="${b.id}">Отменить заявку</button>` : ''}
+    ${b.paidAt ? `<div class="notice ok mt">${ic('circle-check')} Оплачено ${fdate(b.paidAt)}${b.paidMethod ? ` · ${esc(b.paidMethod)}` : ''}</div>` : ''}
     ${b.orderNo ? `<div class="kv mt"><div>Заказ в магазине</div><div class="mono">${esc(b.orderNo)}</div></div>` : ''}
     ${b.track ? `<div class="kv mt-s"><div>Трек до склада</div><div class="mono">${esc(b.track)}</div></div>` : ''}
     ${parcel ? `<a class="btn secondary block mt" href="#/client/parcel/${parcel.id}">Открыть посылку ${parcel.id}</a>` : ''}
   </div></div></div>`;
 };
 A['pay-buyout'] = el => {
-  const b = byId(DB.buyouts, el.dataset.id), c = me();
-  if (c.balance < b.total) { location.hash = `#/client/wallet?topup=${Math.ceil(b.total - c.balance)}`; toast('Недостаточно средств — пополните кошелёк', 'err'); return; }
-  addTx(c.id, 'charge', -b.total, `Оплата счёта ${b.invoiceId} (выкуп ${b.id})`);
-  b.status = 'paid'; b.paidAt = new Date().toISOString();
-  logAction('client', `Оплачен счёт ${b.invoiceId} по выкупу ${b.id}`);
-  Store.save(); render(); toast(`${ic('circle-check')} Счёт оплачен. Менеджер выкупит заказ в ближайшее время.`, 'ok');
+  const b = byId(DB.buyouts, el.dataset.id);
+  payOnline({ amount: b.total, title: `Счёт ${b.invoiceId} (выкуп ${b.id})`, onPaid: method => {
+    b.status = 'paid'; b.paidAt = new Date().toISOString(); b.paidMethod = method;
+    logAction('client', `Оплачен счёт ${b.invoiceId} по выкупу ${b.id} (${method})`);
+  } });
 };
 A['cancel-buyout'] = el => {
   const b = byId(DB.buyouts, el.dataset.id);
@@ -367,24 +369,7 @@ A['cancel-buyout'] = el => {
   b.status = 'cancelled'; logAction('client', `Клиент отменил выкуп ${b.id}`); Store.save(); render();
 };
 
-/* ---------- Кошелёк ---------- */
-const TX_TYPE = { topup: ['Пополнение', 'green'], charge: ['Списание', ''], refund: ['Возврат', 'blue'], bonus: ['Бонус', 'purple'], adjust: ['Корректировка', 'orange'] };
-Client.wallet = (_, q, c) => {
-  const tx = DB.transactions.filter(x => x.clientId === c.id);
-  const invs = DB.buyouts.filter(b => b.clientId === c.id && b.invoiceId);
-  if (q.get('topup')) onMount(() => { history.replaceState(null, '', '#/client/wallet'); A['topup']({ dataset: { amount: q.get('topup') } }); });
-  return `${pageHead('Кошелёк', '', `<button class="btn" data-action="topup">${ic('plus')} Пополнить</button>`)}
-  <div class="grid g3 mb">
-    <div class="card"><div class="stat"><span class="l">Баланс</span><span class="v">${usd(c.balance)}</span><span class="muted">≈ ${kzt(c.balance)}</span></div></div>
-    <div class="card"><div class="stat"><span class="l">Бонусы</span><span class="v">$${c.bonus}</span><span class="muted small">Можно оплатить до 50% доставки</span></div></div>
-    <div class="card"><div class="stat"><span class="l">Потрачено за 30 дней</span><span class="v">${usd(-tx.filter(x => x.amount < 0 && daysSince(x.date) <= 30).reduce((s, x) => s + x.amount, 0))}</span></div></div>
-  </div>
-  <div class="tabs"><a class="active">История операций</a></div>
-  <div class="card pad-0 table-wrap mb"><table class="t"><thead><tr><th>Дата</th><th>Операция</th><th>Описание</th><th class="right">Сумма</th></tr></thead><tbody>
-    ${tx.map(x => `<tr><td class="nowrap">${fdt(x.date)}</td><td><span class="badge ${TX_TYPE[x.type][1]}">${TX_TYPE[x.type][0]}</span></td><td>${esc(x.note)}${x.method ? ` <span class="muted small">· ${esc(x.method)}</span>` : ''}</td><td class="right nowrap" style="color:${x.amount > 0 ? 'var(--green)' : 'inherit'};font-weight:600">${x.amount > 0 ? '+' : ''}${usd(x.amount)}</td></tr>`).join('') || `<tr><td colspan="4">${empty('Операций пока нет')}</td></tr>`}</tbody></table></div>
-  <h3>Счета</h3><div class="card pad-0 table-wrap"><table class="t"><thead><tr><th>Счёт</th><th>Назначение</th><th>Сумма</th><th>Статус</th><th></th></tr></thead><tbody>
-    ${invs.map(b => `<tr><td class="mono">${b.invoiceId}</td><td>Выкуп ${b.id}</td><td>${usd(b.total)}</td><td>${b.status === 'invoiced' ? '<span class="badge orange">Не оплачен</span>' : b.status === 'cancelled' ? '<span class="badge red">Аннулирован</span>' : '<span class="badge green">Оплачен</span>'}</td><td><button class="btn ghost sm" data-action="invoice-pdf" data-id="${b.id}">PDF</button></td></tr>`).join('') || `<tr><td colspan="5" class="muted center">Счетов нет</td></tr>`}</tbody></table></div>`;
-};
+/* ---------- Счёт на выкуп (печать / PDF) ---------- */
 A['invoice-pdf'] = el => {
   const b = byId(DB.buyouts, el.dataset.id), c = clientById(b.clientId), k = buyoutCalc(b);
   openModal('Счёт ' + b.invoiceId, `<div id="inv-print"><div class="row between"><div class="brand"><span class="logo">W</span>Way</div><div class="right small">ТОО «Way Logistics»<br>БИН 000000000000</div></div><hr>
@@ -392,56 +377,6 @@ A['invoice-pdf'] = el => {
     <table class="t"><tbody>${b.items.map(i => `<tr><td>${esc(i.title)} × ${i.qty}</td><td class="right">${usd((i.actual ?? i.price) * i.qty)}</td></tr>`).join('')}<tr><td>Доставка по стране</td><td class="right">${usd(b.localShipping)}</td></tr><tr><td>Комиссия сервиса ${b.commissionPct}%</td><td class="right">${usd(k.commission)}</td></tr><tr><td><b>Итого</b></td><td class="right"><b>${usd(b.total)} (${kzt(b.total)})</b></td></tr></tbody></table></div>
     <div class="modal-foot"><button class="btn" onclick="window.print()">${ic('printer')} Печать / PDF</button></div>`);
 };
-A['topup'] = el => {
-  const amt = el?.dataset?.amount && el.dataset.amount !== '1' ? el.dataset.amount : 20;
-  openModal('Пополнение кошелька', `<form data-form="topup">
-    <label class="field"><span>Сумма, USD</span><input name="amount" type="number" min="1" step="1" value="${amt}" class="big" data-input="topup-kzt"></label>
-    <div class="muted mb" id="topup-kzt">≈ ${kzt(amt)}</div>
-    <div class="chips mb">${[10, 20, 50, 100].map(v => `<button type="button" class="chip" data-action="topup-preset" data-v="${v}">$${v}</button>`).join('')}</div>
-    <div class="pill-select"><label><input type="radio" name="method" value="kaspi" checked><span><b style="color:#f14635">Kaspi Pay</b><br><span class="muted small">QR или переход в приложение Kaspi.kz</span></span></label>
-    <label><input type="radio" name="method" value="card"><span><b>${ic('credit-card')} Банковская карта</b><br><span class="muted small">Visa, Mastercard · 3-D Secure</span></span></label></div>
-    <button class="btn block lg mt">Продолжить</button></form>`);
-};
-CH['topup-kzt'] = el => { $('#topup-kzt').textContent = '≈ ' + kzt(+el.value); };
-A['topup-preset'] = el => { const i = $('input[name=amount]'); i.value = el.dataset.v; CH['topup-kzt'](i); };
-F['topup'] = d => {
-  const amount = +d.amount;
-  if (!(amount > 0)) return;
-  if (d.method === 'kaspi') {
-    openModal('Оплата через Kaspi Pay', `<div class="center"><div style="display:inline-block;padding:14px;border:1px solid var(--border);border-radius:16px">${fakeQR()}</div>
-      <p class="mt">Отсканируйте QR в приложении <b>Kaspi.kz</b><br>Сумма: <b>${kzt(amount)}</b></p><p class="muted small">Тестовый режим эквайринга — платёж будет подтверждён автоматически</p>
-      <div class="row" style="justify-content:center"><span class="spinner"></span><span class="muted">Ожидаем оплату…</span></div></div>`, { noFocus: true });
-    setTimeout(() => finishTopup(amount, 'Kaspi', 'Пополнение через Kaspi Pay'), 2200);
-  } else {
-    openModal('Оплата картой', `<form data-form="card-pay"><input type="hidden" name="amount" value="${amount}">
-      <div class="notice mb">${ic('flask-conical')} Тестовый режим: используйте тестовую карту 4242 4242 4242 4242</div>
-      <label class="field"><span>Номер карты</span><input name="pan" value="4242 4242 4242 4242" class="mono"></label>
-      <div class="inline-inputs"><label class="field"><span>Срок</span><input value="12/29" class="mono"></label><label class="field"><span>CVC</span><input value="123" class="mono" type="password"></label></div>
-      <button class="btn block lg">Оплатить ${kzt(amount)}</button></form>`);
-  }
-};
-F['card-pay'] = d => {
-  openModal('3-D Secure', `<div class="center"><p>Подтверждение платежа в банке…</p><span class="spinner"></span></div>`, { noFocus: true });
-  setTimeout(() => finishTopup(+d.amount, 'Карта', 'Visa •• ' + d.pan.replace(/\s/g, '').slice(-4)), 1600);
-};
-function finishTopup(amount, method, note) {
-  addTx(DB.session.clientId, 'topup', amount, note, method);
-  logAction('client', `Пополнение ${usd(amount)} (${method})`);
-  Store.save(); closeModal();
-  if (location.hash.includes('topup')) location.hash = '#/client/wallet'; else render();
-  toast(`${ic('circle-check')} Баланс пополнен на ${usd(amount)}`, 'ok');
-}
-function fakeQR() {
-  let s = '', seed = 7;
-  for (let y = 0; y < 21; y++) for (let x = 0; x < 21; x++) {
-    seed = (seed * 9301 + 49297) % 233280;
-    const finder = (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13);
-    const on = finder ? (x % 6 === 0 || y % 6 === 0 || (x % 20 > 1 && x % 20 < 5 && y % 20 > 1 && y % 20 < 5) || x === 20 || y === 20 || x === 14 || y === 14) && !((x > 6 && x < 14) || (y > 6 && y < 14)) : seed / 233280 > .5;
-    if (on) s += `<rect x="${x * 8}" y="${y * 8}" width="8" height="8"/>`;
-  }
-  return `<svg width="168" height="168" viewBox="0 0 168 168" fill="#111">${s}</svg>`;
-}
-
 /* ---------- Получение ---------- */
 Client.delivery = (_, __, c) => {
   const dl = c.defaultDelivery || { method: 'pickup', pointId: c.defaultPoint || 'PT-1' };
@@ -453,22 +388,6 @@ Client.delivery = (_, __, c) => {
     <p class="muted small mt-s">${DB.points.filter(p => p.type === 'pvz').length} пунктов выдачи и ${DB.points.filter(p => p.type === 'locker').length} постамата в ${new Set(DB.points.map(p => p.city)).size} городах</p></div>
   <div class="card"><h3>Заявки на курьера</h3>${reqs.map(r => `<div class="small mb-s"><b>${r.id}</b> · ${esc(r.address)}<br><span class="muted">${fdate(r.date)} ${r.slot}</span> ${r.status === 'done' ? '<span class="badge green">Доставлено</span>' : r.extId ? '<span class="badge blue">Передано в службу</span>' : '<span class="badge orange">Ожидает</span>'}</div>`).join('') || '<p class="muted small">Заявки создаются автоматически, когда посылка с курьерской доставкой прибывает в Казахстан.</p>'}</div></div></div>`;
 };
-
-/* ---------- Лояльность и рефералы ---------- */
-Client.loyalty = (_, __, c) => {
-  const friends = DB.clients.filter(x => x.referrer === c.id);
-  const link = `${location.origin}${location.pathname}#/?ref=${c.id}`;
-  return `${pageHead('Бонусы и друзья')}
-  <div class="grid g2 mb"><div class="card"><h3>Уровни лояльности</h3>
-    ${DB.levels.map(l => `<div class="row nowrap mb-s" style="padding:10px;border-radius:10px;${l.id === c.level ? 'background:var(--primary-50)' : ''}"><span class="badge" style="background:${l.color};color:#fff;min-width:78px;justify-content:center">${l.name}</span><div class="grow small"><b>от ${l.fromKg} кг</b> · ${esc(l.perks)}</div>${l.id === c.level ? '<span class="badge indigo">Ваш</span>' : ''}</div>`).join('')}
-    <p class="muted small">Уровень пересчитывается автоматически по суммарному весу отправленных посылок.</p></div>
-  <div class="card"><h3>${ic('gift')} Приглашайте друзей</h3><p>Вы и друг получите по <b>$${DB.settings.referralBonus}</b> после регистрации по вашей ссылке.</p>
-    <div class="copy-line hl"><span class="v small">${esc(link)}</span>${copyBtn(link)}</div>
-    <div class="copy-line"><span class="k">Промокод</span><span class="v mono">${c.id}</span>${copyBtn(c.id)}</div>
-    <div class="row mt-s"><button class="btn secondary sm" data-action="share" data-ch="WhatsApp">WhatsApp</button><button class="btn secondary sm" data-action="share" data-ch="Telegram">Telegram</button></div>
-    <h4 class="mt">Приглашено: ${friends.length}</h4>${friends.map(f => `<div class="row nowrap mb-s">${avatar(f.name, 28)}<span class="grow small">${esc(f.name)}</span><span class="badge green">+$${DB.settings.referralBonus}</span></div>`).join('') || '<p class="muted small">Пока никого</p>'}</div></div>`;
-};
-A['share'] = el => toast(`Откроется ${el.dataset.ch} с готовым сообщением и вашей ссылкой`);
 
 /* ---------- Поддержка ---------- */
 Client.support = (parts, _, c) => {

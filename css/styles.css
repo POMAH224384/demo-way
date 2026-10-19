@@ -263,7 +263,6 @@ table.t input, table.t select { padding: 6px 8px; border-radius: 8px; }
 .tariff-card.best .tariff-price { color: var(--accent); }
 .tariff-price .cur { font-size: 24px; vertical-align: 16px; margin-right: 2px; }
 .tariff-price .unit { font-size: 16px; font-weight: 600; color: var(--muted); margin-left: 2px; letter-spacing: 0; }
-.tariff-levels { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border); display: grid; gap: 4px; }
 .tariff-info { display: flex; flex-wrap: wrap; gap: 10px 24px; justify-content: center; margin-top: 24px; color: #475569; font-size: 13.5px; }
 .tariff-info span { display: inline-flex; align-items: center; gap: 6px; }
 .store-card { display: flex; flex-direction: column; gap: 10px; }
@@ -414,3 +413,18 @@ img.flag { width: 1.34em; height: 1em; object-fit: cover; border-radius: 3px; ve
 .card-head h3 { display: flex; align-items: center; gap: 6px; }
 .topbar h1 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .tariffs-section { scroll-margin-top: calc(var(--rolebar-h) + 66px); }
+
+.tariff-card { cursor: pointer; }
+/* ---------- Калькулятор на главной ---------- */
+.calc-wide { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 0; padding: 0; overflow: hidden; margin-top: 28px; border-radius: 20px; box-shadow: var(--shadow-lg); border: 0; scroll-margin-top: calc(var(--rolebar-h) + 80px); }
+.calc-wide .calc-form { padding: 24px; }
+.calc-wide .calc-out { padding: 24px; background: linear-gradient(160deg, var(--primary-50), #f5f3ff); display: flex; flex-direction: column; justify-content: space-between; }
+.calc-price { font-size: 44px; font-weight: 800; color: var(--primary); letter-spacing: -.03em; line-height: 1.1; }
+.calc-kzt { font-size: 18px; font-weight: 600; color: #334155; }
+.calc-lines { margin-top: 14px; display: grid; gap: 6px; font-size: 13.5px; }
+.calc-lines > div { display: flex; justify-content: space-between; gap: 10px; border-top: 1px dashed #c7d2fe; padding-top: 6px; }
+.calc-lines span { color: var(--muted); }
+@media (max-width: 760px) { .calc-wide { grid-template-columns: minmax(0, 1fr); } }
+/* ---------- Окно оплаты ---------- */
+.pay-sum { text-align: center; padding: 16px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
+.pay-sum .v { font-size: 34px; font-weight: 800; letter-spacing: -.02em; margin: 4px 0; }

@@ -4,9 +4,9 @@ const Site = {};
 const FAQ = [
   ['Как получить адрес склада?', 'Зарегистрируйтесь — система сразу выдаст персональный ID-код (например, WY-10427) и адреса складов во всех странах. ID обязательно указывайте в строке Address 2 — по нему склад определяет владельца.'],
   ['Что делать, если я забыл указать ID?', 'Ничего страшного: склад распознаёт этикетку по фото и найдёт вас по имени получателя. Если не получится — посылка попадёт в «нераспознанные», и вы сможете заявить её, указав трек-номер.'],
-  ['Как считается стоимость доставки?', 'По большему из фактического и объёмного веса (Д×Ш×В/5000), по тарифу страны и вашему уровню лояльности. Минимальная стоимость зависит от страны.'],
-  ['Сколько посылка хранится на складе бесплатно?', '30 дней (45 для уровня Gold и выше). Далее — $0.30 в день.'],
-  ['Как оплатить?', 'Пополните кошелёк через Kaspi Pay или банковской картой, затем оплатите доставку в кабинете в один клик.'],
+  ['Как считается стоимость доставки?', 'По большему из фактического и объёмного веса (Д×Ш×В/5000), по тарифу страны склада. Минимальная стоимость зависит от страны. Точную сумму покажет калькулятор на главной.'],
+  ['Сколько посылка хранится на складе бесплатно?', '30 дней. Далее — $0.30 в день.'],
+  ['Как оплатить?', 'Онлайн в личном кабинете: когда посылка придёт на склад, оплатите доставку через Kaspi Pay или банковской картой. Так же оплачивается счёт по выкупу.'],
   ['Можно ли объединить посылки?', 'Да, выберите несколько посылок на складе одной страны и закажите консолидацию — это экономит до 40% стоимости.'],
   ['Как работает «Купи вместо меня»?', 'Пришлите ссылки на товары, менеджер проверит наличие и выставит счёт (стоимость + комиссия 5%, мин. $3). После оплаты мы выкупим заказ и он придёт на ваш адрес склада.'],
   ['Где получить посылку?', 'В пунктах выдачи и постаматах в Алматы, Астане, Шымкенте, Караганде и Актобе или курьером до двери (бесплатно при доставке от $50).'],
@@ -22,7 +22,7 @@ const TUTORIALS = [
   [ic('combine'), 'Консолидация посылок', 'Когда выгодно объединять и как заказать услугу в кабинете.'],
   [ic('smartphone'), 'Установка приложения', 'Как установить PWA на iPhone и Android за 10 секунд.'],
   [ic('file-text'), 'Таможенные лимиты', 'Беспошлинный лимит, декларирование и как не переплатить.'],
-  [ic('credit-card'), 'Оплата через Kaspi', 'Пополнение кошелька и оплата доставки через Kaspi Pay.'],
+  [ic('credit-card'), 'Оплата через Kaspi', 'Как оплатить доставку и выкуп через Kaspi Pay за пару кликов.'],
 ];
 
 function siteHeader(active) {
@@ -57,10 +57,35 @@ function siteFooter() {
     </div></div></footer>`;
 }
 
+function calculatorCard(code) {
+  return `<div class="card calc-wide" id="calc">
+    <div class="calc-form"><h3>${ic('calculator')} ${t('calc_title')}</h3>
+      <div class="grid g2"><label class="field"><span>${t('calc_country')}</span><select id="calc-country" data-input="calc">${countryOptions(code)}</select></label>
+        <label class="field"><span>${t('calc_weight')}</span><input id="calc-w" type="number" step="0.1" min="0.1" value="1.5" data-input="calc"></label></div>
+      <label class="field"><span>${t('calc_dims')}</span><div class="inline-inputs"><input id="calc-l" type="number" min="0" placeholder="Д" value="30" data-input="calc"><input id="calc-wd" type="number" min="0" placeholder="Ш" value="20" data-input="calc"><input id="calc-h" type="number" min="0" placeholder="В" value="15" data-input="calc"></div></label>
+      <p class="muted small" style="margin:0">${ic('info')} ${t('t_vol')}</p></div>
+    <div class="calc-out"><div id="calc-result"></div><button class="btn accent block lg mt" data-action="auth">${t('t_cta')} ${ic('arrow-right')}</button></div>
+  </div>`;
+}
+CH['calc'] = () => {
+  if (!$('#calc-country')) return;
+  const r = calcShipping($('#calc-country').value, +$('#calc-w').value, { l: +$('#calc-l').value, w: +$('#calc-wd').value, h: +$('#calc-h').value });
+  if (!r) return;
+  $('#calc-result').innerHTML = `<div class="muted small">${t('calc_total')}</div><div class="calc-price">$${r.cost.toFixed(2)}</div><div class="calc-kzt">≈ ${kzt(r.cost)}</div>
+    <div class="calc-lines"><div><span>${t('calc_vol')}</span><b>${r.vol} кг</b></div><div><span>${t('calc_charge')}</span><b>${r.chargeable} кг × $${r.perKg}</b></div><div><span>${t('calc_term')}</span><b>${esc(r.transit)}</b></div>
+    ${r.cost === r.min ? `<div><span>${t('calc_minnote')}</span><b>$${r.min}</b></div>` : ''}</div>`;
+};
+A['calc-pick'] = el => {
+  const sel = $('#calc-country'); if (!sel) return;
+  sel.value = el.dataset.code; CH['calc']();
+  $('#calc').scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
 Site.home = () => {
   const countries = DB.countries.filter(c => c.active);
   const me = clientById(DB.session.clientId), us = countryBy('US');
-  const cheapest = [...countries].sort((x, y) => x.perKg.base - y.perKg.base)[0]?.code;
+  const cheapest = [...countries].sort((x, y) => x.perKg - y.perKg)[0]?.code;
+  onMount(CH['calc']);
   // переход «Тарифы» с другой страницы: прокручиваем после рендера
   try { if (sessionStorage.getItem('qazbox-scroll') === 'tariffs') { sessionStorage.removeItem('qazbox-scroll'); onMount(() => $('#tariffs')?.scrollIntoView({ block: 'start' })); } } catch {}
   return `${siteHeader('home')}
@@ -87,19 +112,17 @@ Site.home = () => {
 
   <section class="section tariffs-section" id="tariffs"><div class="container">
     <div class="section-title"><h2>${t('tariffs_title')}</h2><p>${t('tariffs_sub')}</p></div>
-    <div class="tariff-grid">${countries.map(c => `<div class="tariff-card ${c.code === cheapest ? 'best' : ''}">
+    <div class="tariff-grid">${countries.map(c => `<div class="tariff-card ${c.code === cheapest ? 'best' : ''}" data-action="calc-pick" data-code="${c.code}" title="Рассчитать для: ${esc(c.name)}">
       ${c.code === cheapest ? `<span class="tariff-ribbon">${ic('star')} ${t('t_best')}</span>` : ''}
       <div class="row nowrap tariff-country"><span class="flag-lg">${flag(c.code)}</span><div><b>${esc(c.name)}</b><div class="muted small">${ic('clock')} ${c.transit}</div></div></div>
-      <div class="tariff-price"><span class="cur">$</span>${c.perKg.base}<span class="unit">${t('per_kg')}</span></div>
-      <div class="muted small">≈ ${kzt(c.perKg.base)} · ${t('t_min')} $${c.minCharge}</div>
-      <div class="tariff-levels"><div class="muted small mb-s">${t('t_levels')}</div>${DB.levels.slice(1).map(l => `<div class="row between small"><span><span class="dot-st" style="background:${l.color}"></span> ${l.name}</span><b>$${c.perKg[l.id]}</b></div>`).join('')}</div>
+      <div class="tariff-price"><span class="cur">$</span>${c.perKg}<span class="unit">${t('per_kg')}</span></div>
+      <div class="muted small">≈ ${kzt(c.perKg)} · ${t('t_min')} $${c.minCharge}</div>
     </div>`).join('')}</div>
+    ${calculatorCard(countries[0]?.code)}
     <div class="tariff-info">
-      <span>${ic('scale')} ${t('t_vol')}</span>
       <span>${ic('truck')} ${t('t_courier')} — $${DB.settings.courierPrice}, ${t('t_free')} $${DB.settings.freeCourierFrom}</span>
       <span>${ic('banknote')} ${t('t_rate')}: 1 USD = ${DB.settings.rates.KZT} ₸</span>
     </div>
-    <div class="center mt"><button class="btn lg accent" data-action="auth">${t('t_cta')} ${ic('arrow-right')}</button></div>
   </div></section>
 
   <section class="section"><div class="container">
@@ -212,7 +235,6 @@ A['auth'] = (el) => {
   authModal('register');
 };
 function authModal(mode, method = 'email') {
-  const ref = new URLSearchParams(location.hash.split('?')[1] || '').get('ref') || '';
   const tabs = `<div class="tabs"><button data-action="auth-mode" data-mode="register" class="${mode === 'register' ? 'active' : ''}">Регистрация</button><button data-action="auth-mode" data-mode="login" class="${mode === 'login' ? 'active' : ''}">Вход</button></div>`;
   const methods = `<div class="chips mb">${[['email', `${ic('mail')} Email`], ['phone', `${ic('smartphone')} Телефон`]].map(([k, v]) => `<button type="button" class="chip ${method === k ? 'active' : ''}" data-action="auth-method" data-mode="${mode}" data-method="${k}">${v}</button>`).join('')}</div>`;
   const google = `<button type="button" class="btn secondary block" data-action="auth-google"><b style="color:#4285f4">G</b> Продолжить с Google</button><div class="center muted small" style="margin:12px 0">или</div>`;
@@ -224,7 +246,6 @@ function authModal(mode, method = 'email') {
       <label class="field"><span>Имя латиницей (как на посылках)</span><input name="latin" id="reg-latin" required placeholder="AIZHAN BEKOVA"></label>
       ${method === 'email' ? `<label class="field"><span>Email</span><input name="email" type="email" required placeholder="you@mail.kz"></label><label class="field"><span>Пароль</span><input name="password" type="password" required minlength="6" placeholder="Минимум 6 символов"></label>`
         : `<label class="field"><span>Телефон</span><input name="phone" required placeholder="+7 7__ ___ __ __" value="+7 "></label>`}
-      <label class="field"><span>Промокод друга (необязательно)</span><input name="ref" value="${esc(ref)}" placeholder="WY-10427"></label>
       <label class="check small"><input type="checkbox" required checked> Принимаю <a href="#/help?tab=terms" target="_blank">условия сервиса</a> и политику конфиденциальности</label>
       <button class="btn block lg mt">Зарегистрироваться</button></form>`;
   } else {
@@ -241,17 +262,10 @@ A['auth-method'] = el => authModal(el.dataset.mode, el.dataset.method);
 CH['translit'] = el => { const l = $('#reg-latin'); if (l && !l.dataset.touched) l.value = translit(el.value); };
 document.addEventListener('input', e => { if (e.target.id === 'reg-latin') e.target.dataset.touched = '1'; });
 
-function createClient({ name, latin, email, phone, ref, via }) {
+function createClient({ name, latin, email, phone, via }) {
   const id = 'WY-' + (++DB.seq.client);
-  const c = { id, name, latin: (latin || translit(name)).toUpperCase(), email: email || '', phone: phone || '', city: 'Алматы', level: 'base', shippedKg: 0, balance: 0, bonus: 0, referrer: null, createdAt: new Date().toISOString(), via, channels: { email: !!email, sms: !!phone, whatsapp: false, telegram: false, push: false } };
-  const r = ref && clientById(ref.trim().toUpperCase());
+  const c = { id, name, latin: (latin || translit(name)).toUpperCase(), email: email || '', phone: phone || '', city: 'Алматы', createdAt: new Date().toISOString(), via, channels: { email: !!email, sms: !!phone, whatsapp: false, telegram: false, push: false } };
   DB.clients.unshift(c);
-  if (r) {
-    c.referrer = r.id;
-    addTx(id, 'bonus', DB.settings.referralBonus, `Приветственный бонус по приглашению ${r.id}`);
-    addTx(r.id, 'bonus', DB.settings.referralBonus, `Реферальный бонус: ${name}`);
-    notify(r.id, `Ваш друг ${name} зарегистрировался — начислено $${DB.settings.referralBonus}`, true);
-  }
   DB.session.clientId = id;
   logAction('client', `Регистрация клиента ${id} (${via})`);
   notify(id, `Добро пожаловать в Way! Ваш персональный код: ${id}`, true);

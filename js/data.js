@@ -1,6 +1,6 @@
 /* Демо-данные и «база» в localStorage. Бэкенда нет — всё живёт в браузере. */
 const STORAGE_KEY = 'qazbox-demo';
-const DATA_VERSION = 5;
+const DATA_VERSION = 6;
 const DAY = 864e5;
 
 function iso(daysAgo, hour = 11) {
@@ -111,41 +111,35 @@ function seed() {
   const s = {
     version: DATA_VERSION,
     session: { clientId: 'WY-10427', whCountry: 'US' },
-    seq: { parcel: 1100, client: 10700, buyout: 220, tx: 5000, batch: 300, sr: 60, ticket: 40, courier: 10, inv: 900 },
+    seq: { parcel: 1100, client: 10700, buyout: 220, pay: 5000, batch: 300, sr: 60, ticket: 40, courier: 10, inv: 900 },
     settings: {
       rates: { KZT: 505, EUR: 0.92, GBP: 0.79, CNY: 7.15 },
       courierPrice: 3, freeCourierFrom: 50, buyoutCommission: 5, minBuyoutCommission: 3,
-      storageFreeDays: 30, storageFeePerDay: 0.3, referralBonus: 5, volumetricDivider: 5000,
+      storageFreeDays: 30, storageFeePerDay: 0.3, volumetricDivider: 5000,
     },
-    levels: [
-      { id: 'base', name: 'Base', fromKg: 0, color: '#64748b', perks: 'Базовые тарифы' },
-      { id: 'silver', name: 'Silver', fromKg: 20, color: '#94a3b8', perks: '−5% к тарифу, бесплатное фото' },
-      { id: 'gold', name: 'Gold', fromKg: 60, color: '#d4a017', perks: '−10% к тарифу, 45 дней хранения' },
-      { id: 'platinum', name: 'Platinum', fromKg: 150, color: '#7c3aed', perks: '−15% к тарифу, персональный менеджер' },
-    ],
     countries: [
-      { code: 'US', name: 'США', active: true, transit: '7–12 дней', minCharge: 5, perKg: { base: 9.9, silver: 9.4, gold: 8.9, platinum: 8.4 },
+      { code: 'US', name: 'США', active: true, transit: '7–12 дней', minCharge: 5, perKg: 9.9,
         address: { line1: '1201 N Orange St, Suite 7', line2: '{ID}', city: 'Wilmington', region: 'DE (Delaware, без налога)', zip: '19801', phone: '+1 302 555 0142' } },
-      { code: 'GB', name: 'Англия', active: true, transit: '8–14 дней', minCharge: 6, perKg: { base: 10.5, silver: 10, gold: 9.5, platinum: 8.9 },
+      { code: 'GB', name: 'Англия', active: true, transit: '8–14 дней', minCharge: 6, perKg: 10.5,
         address: { line1: 'Unit 5, Heathrow Logistics Park', line2: '{ID}', city: 'Hounslow', region: 'Middlesex', zip: 'TW6 2GH', phone: '+44 20 3807 1120' } },
-      { code: 'DE', name: 'Германия', active: true, transit: '8–12 дней', minCharge: 5, perKg: { base: 9.5, silver: 9, gold: 8.6, platinum: 8.1 },
+      { code: 'DE', name: 'Германия', active: true, transit: '8–12 дней', minCharge: 5, perKg: 9.5,
         address: { line1: 'Lagerstraße 12', line2: '{ID}', city: 'Frankfurt am Main', region: 'Hessen', zip: '60549', phone: '+49 69 2475 3301' } },
-      { code: 'ES', name: 'Испания', active: true, transit: '10–14 дней', minCharge: 5, perKg: { base: 9.8, silver: 9.3, gold: 8.8, platinum: 8.3 },
+      { code: 'ES', name: 'Испания', active: true, transit: '10–14 дней', minCharge: 5, perKg: 9.8,
         address: { line1: 'Calle de la Logística 8, Nave 3', line2: '{ID}', city: 'Madrid', region: 'Madrid', zip: '28042', phone: '+34 910 555 284' } },
-      { code: 'CN', name: 'Китай', active: true, transit: '12–18 дней', minCharge: 4, perKg: { base: 6.8, silver: 6.5, gold: 6.1, platinum: 5.8 },
+      { code: 'CN', name: 'Китай', active: true, transit: '12–18 дней', minCharge: 4, perKg: 6.8,
         address: { line1: '广州市白云区石井街道 物流园 3栋 302', line2: '{ID}', city: 'Guangzhou (广州)', region: 'Guangdong', zip: '510430', phone: '+86 20 3622 7781' } },
-      { code: 'TR', name: 'Турция', active: false, transit: '7–10 дней', minCharge: 5, perKg: { base: 8.5, silver: 8.1, gold: 7.7, platinum: 7.2 },
+      { code: 'TR', name: 'Турция', active: false, transit: '7–10 дней', minCharge: 5, perKg: 8.5,
         address: { line1: 'Atatürk Cd. No:44', line2: '{ID}', city: 'İstanbul', region: 'Esenyurt', zip: '34510', phone: '+90 212 555 0190' } },
     ],
     clients: [
-      { id: 'WY-10427', name: 'Айгерим Нурланова', latin: 'AIGERIM NURLANOVA', email: 'aigerim@example.kz', phone: '+7 701 555 12 34', city: 'Алматы', level: 'gold', shippedKg: 74.5, balance: 42.5, bonus: 12, referrer: null, createdAt: iso(410), via: 'google', blocked: false, channels: { email: true, sms: false, whatsapp: true, telegram: true, push: false } },
-      { id: 'WY-10388', name: 'Ерлан Сапаров', latin: 'YERLAN SAPAROV', email: 'yerlan.s@example.kz', phone: '+7 702 444 55 66', city: 'Астана', level: 'silver', shippedKg: 31.2, balance: 15, bonus: 0, referrer: 'WY-10427', createdAt: iso(220), via: 'phone' },
-      { id: 'WY-10512', name: 'Динара Ахметова', latin: 'DINARA AKHMETOVA', email: 'dinara.a@example.kz', phone: '+7 705 222 33 44', city: 'Шымкент', level: 'base', shippedKg: 9.4, balance: 4.2, bonus: 0, referrer: 'WY-10427', createdAt: iso(95), via: 'email' },
-      { id: 'WY-10095', name: 'Тимур Касымов', latin: 'TIMUR KASSYMOV', email: 'timur.k@example.kz', phone: '+7 777 100 20 30', city: 'Алматы', level: 'platinum', shippedKg: 212, balance: 310, bonus: 40, referrer: null, createdAt: iso(800), via: 'email' },
-      { id: 'WY-10603', name: 'Мадина Жумабаева', latin: 'MADINA ZHUMABAYEVA', email: 'madina.zh@example.kz', phone: '+7 708 999 88 77', city: 'Караганда', level: 'base', shippedKg: 2.1, balance: 0, bonus: 0, referrer: null, createdAt: iso(30), via: 'google' },
-      { id: 'WY-10244', name: 'Арман Исмаилов', latin: 'ARMAN ISMAILOV', email: 'arman.i@example.kz', phone: '+7 747 321 65 98', city: 'Астана', level: 'silver', shippedKg: 44, balance: 22.8, bonus: 5, referrer: null, createdAt: iso(500), via: 'phone' },
-      { id: 'WY-10671', name: 'Алия Серикова', latin: 'ALIYA SERIKOVA', email: 'aliya.s@example.kz', phone: '+7 700 765 43 21', city: 'Алматы', level: 'base', shippedKg: 6.8, balance: 11, bonus: 5, referrer: 'WY-10427', createdAt: iso(60), via: 'email' },
-      { id: 'WY-10159', name: 'Данияр Омаров', latin: 'DANIYAR OMAROV', email: 'daniyar.o@example.kz', phone: '+7 701 909 08 07', city: 'Актобе', level: 'gold', shippedKg: 98, balance: 64, bonus: 10, referrer: null, createdAt: iso(650), via: 'email' },
+      { id: 'WY-10427', name: 'Айгерим Нурланова', latin: 'AIGERIM NURLANOVA', email: 'aigerim@example.kz', phone: '+7 701 555 12 34', city: 'Алматы', createdAt: iso(410), via: 'google', blocked: false, channels: { email: true, sms: false, whatsapp: true, telegram: true, push: false } },
+      { id: 'WY-10388', name: 'Ерлан Сапаров', latin: 'YERLAN SAPAROV', email: 'yerlan.s@example.kz', phone: '+7 702 444 55 66', city: 'Астана', createdAt: iso(220), via: 'phone' },
+      { id: 'WY-10512', name: 'Динара Ахметова', latin: 'DINARA AKHMETOVA', email: 'dinara.a@example.kz', phone: '+7 705 222 33 44', city: 'Шымкент', createdAt: iso(95), via: 'email' },
+      { id: 'WY-10095', name: 'Тимур Касымов', latin: 'TIMUR KASSYMOV', email: 'timur.k@example.kz', phone: '+7 777 100 20 30', city: 'Алматы', createdAt: iso(800), via: 'email' },
+      { id: 'WY-10603', name: 'Мадина Жумабаева', latin: 'MADINA ZHUMABAYEVA', email: 'madina.zh@example.kz', phone: '+7 708 999 88 77', city: 'Караганда', createdAt: iso(30), via: 'google' },
+      { id: 'WY-10244', name: 'Арман Исмаилов', latin: 'ARMAN ISMAILOV', email: 'arman.i@example.kz', phone: '+7 747 321 65 98', city: 'Астана', createdAt: iso(500), via: 'phone' },
+      { id: 'WY-10671', name: 'Алия Серикова', latin: 'ALIYA SERIKOVA', email: 'aliya.s@example.kz', phone: '+7 700 765 43 21', city: 'Алматы', createdAt: iso(60), via: 'email' },
+      { id: 'WY-10159', name: 'Данияр Омаров', latin: 'DANIYAR OMAROV', email: 'daniyar.o@example.kz', phone: '+7 701 909 08 07', city: 'Актобе', createdAt: iso(650), via: 'email' },
     ],
     parcels: genParcels(),
     batches: [
@@ -164,21 +158,15 @@ function seed() {
       { id: 'BY-0215', clientId: 'WY-10603', country: 'CN', status: 'new', createdAt: iso(0.5), items: [{ url: 'https://item.taobao.com/item.htm?id=6823', title: 'Платье летнее', params: 'S, голубое', qty: 1, price: 18, actual: null }], localShipping: 0, commissionPct: 5, total: null },
       { id: 'BY-0209', clientId: 'WY-10159', country: 'US', status: 'shipped', createdAt: iso(10), items: [{ url: 'https://www.homedepot.com/p/123', title: 'Набор инструментов DeWalt', params: '', qty: 1, price: 199, actual: 189 }], localShipping: 9, commissionPct: 5, total: 207.9, orderNo: 'HD-55120', track: '1Z999AA10166677788', invoiceId: 'INV-0860' },
     ],
-    transactions: [
-      { id: 'TX-4990', clientId: 'WY-10427', type: 'topup', amount: 100, date: iso(40), method: 'Kaspi', note: 'Пополнение через Kaspi Pay' },
-      { id: 'TX-4991', clientId: 'WY-10427', type: 'charge', amount: -10.8, date: iso(33), note: 'Доставка P-1006 (Zara, ES)' },
-      { id: 'TX-4992', clientId: 'WY-10427', type: 'bonus', amount: 5, date: iso(30), note: 'Реферальный бонус: Алия Серикова' },
-      { id: 'TX-4993', clientId: 'WY-10427', type: 'topup', amount: 50, date: iso(20), method: 'Карта', note: 'Visa •• 4242' },
-      { id: 'TX-4994', clientId: 'WY-10427', type: 'charge', amount: -21.6, date: iso(17), note: 'Доставка P-1005 (Taobao, CN)' },
-      { id: 'TX-4995', clientId: 'WY-10427', type: 'charge', amount: -8.9, date: iso(12), note: 'Доставка P-1008 (Sephora, US)' },
-      { id: 'TX-4996', clientId: 'WY-10427', type: 'charge', amount: -17.1, date: iso(8), note: 'Доставка P-1004 (Zalando, DE)' },
-      { id: 'TX-4997', clientId: 'WY-10427', type: 'charge', amount: -62.99, date: iso(6), note: 'Оплата счёта INV-0880 (выкуп BY-0212)' },
-      { id: 'TX-4998', clientId: 'WY-10427', type: 'topup', amount: 30, date: iso(6), method: 'Kaspi', note: 'Пополнение через Kaspi Pay' },
-      { id: 'TX-4999', clientId: 'WY-10427', type: 'charge', amount: -9.4, date: iso(5), note: 'Доставка P-1007 (ASOS, GB)' },
-      { id: 'TX-4980', clientId: 'WY-10095', type: 'topup', amount: 1000, date: iso(3), method: 'Карта', note: 'Mastercard •• 5100' },
-      { id: 'TX-4981', clientId: 'WY-10095', type: 'charge', amount: -681.45, date: iso(1), note: 'Оплата счёта INV-0891 (выкуп BY-0214)' },
-      { id: 'TX-4982', clientId: 'WY-10388', type: 'topup', amount: 30, date: iso(4), method: 'Kaspi', note: 'Пополнение через Kaspi Pay' },
-      { id: 'TX-4983', clientId: 'WY-10388', type: 'charge', amount: -15, date: iso(4), note: 'Доставка P-1010 (Nike, US)' },
+    payments: [
+      { id: 'PAY-4991', clientId: 'WY-10427', amount: 10.8, date: iso(33), method: 'Kaspi Pay', note: 'Доставка P-1006 (Zara, ES)' },
+      { id: 'PAY-4994', clientId: 'WY-10427', amount: 21.6, date: iso(17), method: 'Visa •• 4242', note: 'Доставка P-1005 (Taobao, CN)' },
+      { id: 'PAY-4995', clientId: 'WY-10427', amount: 8.9, date: iso(12), method: 'Kaspi Pay', note: 'Доставка P-1008 (Sephora, US)' },
+      { id: 'PAY-4996', clientId: 'WY-10427', amount: 17.1, date: iso(8), method: 'Kaspi Pay', note: 'Доставка P-1004 (Zalando, DE)' },
+      { id: 'PAY-4997', clientId: 'WY-10427', amount: 62.99, date: iso(6), method: 'Visa •• 4242', note: 'Счёт INV-0880 (выкуп BY-0212)' },
+      { id: 'PAY-4999', clientId: 'WY-10427', amount: 9.4, date: iso(5), method: 'Kaspi Pay', note: 'Доставка P-1007 (ASOS, GB)' },
+      { id: 'PAY-4981', clientId: 'WY-10095', amount: 681.45, date: iso(1), method: 'Mastercard •• 5100', note: 'Счёт INV-0891 (выкуп BY-0214)' },
+      { id: 'PAY-4983', clientId: 'WY-10388', amount: 15, date: iso(4), method: 'Kaspi Pay', note: 'Доставка P-1010 (Nike, US)' },
     ],
     serviceRequests: [
       { id: 'SR-0051', clientId: 'WY-10603', parcelIds: ['P-1013'], type: 'repack', status: 'new', createdAt: iso(0.4), price: 3, comment: 'Уберите лишнюю упаковку' },
@@ -218,7 +206,7 @@ function seed() {
       ] },
       { id: 'T-0035', clientId: 'WY-10388', subject: 'Возврат за переплату', status: 'closed', createdAt: iso(9), messages: [
         { from: 'client', text: 'Списали дважды за доставку', date: iso(9) },
-        { from: 'support', text: 'Вернули $15 на баланс, приносим извинения!', date: iso(8) },
+        { from: 'support', text: 'Оформили возврат $15 на вашу карту — деньги придут в течение 1–3 дней. Приносим извинения!', date: iso(8) },
       ] },
     ],
     notifications: [
@@ -233,7 +221,7 @@ function seed() {
       { date: iso(1.2), role: 'Администратор', user: 'Админ', text: 'Изменён курс USD/KZT: 503 → 505' },
       { date: iso(2), role: 'Оператор склада', user: 'Mike R. (US)', text: 'Посылка TBA308812200077 помещена в нераспознанные' },
       { date: iso(2.1), role: 'Оператор склада', user: 'Klaus W. (DE)', text: 'Сформирована партия B-DE-0042 (2 посылки, 3.5 кг)' },
-      { date: iso(3), role: 'Администратор', user: 'Админ', text: 'Ручная корректировка баланса WY-10388: +$15 (возврат переплаты)' },
+      { date: iso(3), role: 'Администратор', user: 'Админ', text: 'Возврат платежа WY-10388: $15 на карту (двойное списание)' },
     ],
     integrations: {
       kaspi: { on: true, mode: 'test' }, cards: { on: true, mode: 'test', provider: 'Halyk ePay / CloudPayments' },
@@ -265,4 +253,3 @@ const clientById = id => byId(DB.clients, id);
 const countryBy = code => DB.countries.find(c => c.code === code);
 const parcelById = id => byId(DB.parcels, id);
 const pointById = id => byId(DB.points, id);
-const levelOf = c => DB.levels.find(l => l.id === c?.level) || DB.levels[0];

@@ -36,7 +36,8 @@ const I18N = {
     hero_cta: 'Получить адрес бесплатно',
     hero_b1: `${ic('zap')} от 7 дней`, hero_b2: `${ic('credit-card')} Kaspi и карты`, hero_b3: `${ic('map-pin')} ПВЗ и постаматы`,
     addr_title: 'Ваш адрес в США', addr_note: 'Личный ID-код в строке Address 2 — по нему склад узнаёт вашу посылку', addr_more: 'и ещё 4 страны',
-    per_kg: '/кг', t_min: 'минимум', t_best: 'Самый выгодный', t_levels: 'Цена со скидкой по уровню', t_vol: 'Оплачивается больший из фактического и объёмного веса (Д×Ш×В / 5000)', t_courier: 'Курьер по городу', t_free: 'бесплатно при доставке от', t_rate: 'Курс', t_cta: 'Получить адрес и начать',
+    calc_title: 'Калькулятор доставки', calc_country: 'Страна склада', calc_weight: 'Вес, кг', calc_dims: 'Габариты, см (Д × Ш × В)', calc_total: 'Стоимость доставки', calc_vol: 'Объёмный вес', calc_charge: 'К оплате', calc_term: 'Срок', calc_minnote: 'минимальная стоимость',
+    per_kg: '/кг', t_min: 'минимум', t_best: 'Самый выгодный', t_vol: 'Оплачивается больший из фактического и объёмного веса (Д×Ш×В / 5000)', t_courier: 'Курьер по городу', t_free: 'бесплатно при доставке от', t_rate: 'Курс', t_cta: 'Получить адрес и начать',
     how_title: 'Как это работает', how_sub: 'Четыре шага от корзины в зарубежном магазине до вашей двери',
     s1t: 'Зарегистрируйтесь', s1d: 'Получите персональный ID-код и адреса складов в 5 странах',
     s2t: 'Покупайте', s2d: 'Укажите адрес склада при оформлении заказа в любом магазине',
@@ -49,7 +50,7 @@ const I18N = {
     sv3t: 'Фото и проверка', sv3d: 'Покажем содержимое и сверим с заказом до отправки.',
     sv4t: 'Курьер и постаматы', sv4d: 'Получайте в ПВЗ, постамате 24/7 или курьером до двери.',
     stores_title: 'Популярные магазины', stores_all: 'Весь каталог →',
-    tariffs_title: 'Тарифы на доставку', tariffs_sub: 'Честная цена за 1 кг без скрытых платежей. Чем больше отправляете — тем дешевле.',
+    tariffs_title: 'Тарифы на доставку', tariffs_sub: 'Честная цена за 1 кг без скрытых платежей. Рассчитайте стоимость своей посылки ниже.',
     app_title: 'Приложение всегда под рукой', app_sub: 'Установите веб-приложение на телефон прямо с сайта — без App Store и Google Play. Push-уведомления о каждом статусе.',
     app_install: 'Установить приложение',
     faq_title: 'Частые вопросы',
@@ -59,8 +60,8 @@ const I18N = {
     track_title: 'Отслеживание посылки', track_ph: 'Трек-номер или номер посылки', track_btn: 'Найти',
     stores_page: 'Каталог магазинов', search: 'Поиск', all_countries: 'Все страны', all_categories: 'Все категории',
     help_title: 'Помощь',
-    c_dashboard: 'Главная', c_parcels: 'Посылки', c_addresses: 'Мои адреса', c_buyout: 'Купи вместо меня', c_wallet: 'Кошелёк',
-    c_delivery: 'Получение', c_loyalty: 'Бонусы и друзья', c_support: 'Поддержка', c_settings: 'Настройки', c_more: 'Ещё',
+    c_dashboard: 'Главная', c_parcels: 'Посылки', c_addresses: 'Мои адреса', c_buyout: 'Купи вместо меня',
+    c_delivery: 'Получение', c_support: 'Поддержка', c_settings: 'Настройки', c_more: 'Ещё',
   },
   kk: {
     nav_tariffs: 'Тарифтер', nav_stores: 'Дүкендер', nav_track: 'Бақылау', nav_help: 'Көмек', nav_login: 'Кіру', nav_cabinet: 'Жеке кабинет',
@@ -69,7 +70,8 @@ const I18N = {
     hero_cta: 'Мекенжайды тегін алу',
     hero_b1: `${ic('zap')} 7 күннен бастап`, hero_b2: `${ic('credit-card')} Kaspi және карталар`, hero_b3: `${ic('map-pin')} Беру пункттері мен постаматтар`,
     addr_title: 'АҚШ-тағы мекенжайыңыз', addr_note: 'Жеке ID-код Address 2 жолында — қойма сәлемдемеңізді сол арқылы таниды', addr_more: 'және тағы 4 ел',
-    per_kg: '/кг', t_min: 'ең аз', t_best: 'Ең тиімді', t_levels: 'Деңгей бойынша жеңілдікпен', t_vol: 'Нақты және көлемдік салмақтың үлкені бойынша төленеді (Ұ×Е×Б / 5000)', t_courier: 'Қала бойынша курьер', t_free: 'тегін, жеткізу құны', t_rate: 'Бағам', t_cta: 'Мекенжай алып, бастау',
+    calc_title: 'Жеткізу калькуляторы', calc_country: 'Қойма елі', calc_weight: 'Салмағы, кг', calc_dims: 'Өлшемдері, см (Ұ × Е × Б)', calc_total: 'Жеткізу құны', calc_vol: 'Көлемдік салмақ', calc_charge: 'Төлемге', calc_term: 'Мерзімі', calc_minnote: 'ең төменгі құн',
+    per_kg: '/кг', t_min: 'ең аз', t_best: 'Ең тиімді', t_vol: 'Нақты және көлемдік салмақтың үлкені бойынша төленеді (Ұ×Е×Б / 5000)', t_courier: 'Қала бойынша курьер', t_free: 'тегін, жеткізу құны', t_rate: 'Бағам', t_cta: 'Мекенжай алып, бастау',
     how_title: 'Бұл қалай жұмыс істейді', how_sub: 'Шетелдік дүкен себетінен есігіңізге дейін төрт қадам',
     s1t: 'Тіркеліңіз', s1d: 'Жеке ID-код пен 5 елдегі қойма мекенжайларын алыңыз',
     s2t: 'Сатып алыңыз', s2d: 'Тапсырыс беру кезінде қойма мекенжайын көрсетіңіз',
@@ -82,7 +84,7 @@ const I18N = {
     sv3t: 'Фото және тексеру', sv3d: 'Жөнелтер алдында ішін көрсетіп, тапсырыспен салыстырамыз.',
     sv4t: 'Курьер және постаматтар', sv4d: 'Пунктте, 24/7 постаматта немесе курьер арқылы алыңыз.',
     stores_title: 'Танымал дүкендер', stores_all: 'Толық каталог →',
-    tariffs_title: 'Жеткізу тарифтері', tariffs_sub: '1 кг үшін әділ баға, жасырын төлемсіз. Көп жіберсеңіз — арзанырақ.',
+    tariffs_title: 'Жеткізу тарифтері', tariffs_sub: '1 кг үшін әділ баға, жасырын төлемсіз. Сәлемдемеңіздің құнын төменде есептеңіз.',
     app_title: 'Қосымша әрқашан қолыңызда', app_sub: 'Веб-қосымшаны телефонға тікелей сайттан орнатыңыз — App Store мен Google Play-сіз.',
     app_install: 'Қосымшаны орнату',
     faq_title: 'Жиі қойылатын сұрақтар',
@@ -92,8 +94,8 @@ const I18N = {
     track_title: 'Сәлемдемені бақылау', track_ph: 'Трек-нөмір немесе сәлемдеме нөмірі', track_btn: 'Іздеу',
     stores_page: 'Дүкендер каталогы', search: 'Іздеу', all_countries: 'Барлық елдер', all_categories: 'Барлық санаттар',
     help_title: 'Көмек',
-    c_dashboard: 'Басты бет', c_parcels: 'Сәлемдемелер', c_addresses: 'Мекенжайларым', c_buyout: 'Мен үшін сатып ал', c_wallet: 'Әмиян',
-    c_delivery: 'Алу тәсілі', c_loyalty: 'Бонустар', c_support: 'Қолдау', c_settings: 'Баптаулар', c_more: 'Тағы',
+    c_dashboard: 'Басты бет', c_parcels: 'Сәлемдемелер', c_addresses: 'Мекенжайларым', c_buyout: 'Мен үшін сатып ал',
+    c_delivery: 'Алу тәсілі', c_support: 'Қолдау', c_settings: 'Баптаулар', c_more: 'Тағы',
   },
   en: {
     nav_tariffs: 'Rates', nav_stores: 'Stores', nav_track: 'Track', nav_help: 'Help', nav_login: 'Sign in', nav_cabinet: 'My account',
@@ -102,7 +104,8 @@ const I18N = {
     hero_cta: 'Get a free address',
     hero_b1: `${ic('zap')} from 7 days`, hero_b2: `${ic('credit-card')} Kaspi & cards`, hero_b3: `${ic('map-pin')} Pickup points & lockers`,
     addr_title: 'Your address in the USA', addr_note: 'Your personal ID goes in Address 2 — that is how the warehouse recognises your parcel', addr_more: 'and 4 more countries',
-    per_kg: '/kg', t_min: 'minimum', t_best: 'Best value', t_levels: 'Discounted price by level', t_vol: 'The greater of actual and volumetric weight is charged (L×W×H / 5000)', t_courier: 'City courier', t_free: 'free for shipments from', t_rate: 'Rate', t_cta: 'Get an address and start',
+    calc_title: 'Shipping calculator', calc_country: 'Warehouse country', calc_weight: 'Weight, kg', calc_dims: 'Dimensions, cm (L × W × H)', calc_total: 'Shipping cost', calc_vol: 'Volumetric weight', calc_charge: 'Charged', calc_term: 'Transit', calc_minnote: 'minimum charge',
+    per_kg: '/kg', t_min: 'minimum', t_best: 'Best value', t_vol: 'The greater of actual and volumetric weight is charged (L×W×H / 5000)', t_courier: 'City courier', t_free: 'free for shipments from', t_rate: 'Rate', t_cta: 'Get an address and start',
     how_title: 'How it works', how_sub: 'Four steps from a foreign store cart to your door',
     s1t: 'Sign up', s1d: 'Get a personal ID code and warehouse addresses in 5 countries',
     s2t: 'Shop', s2d: 'Use our warehouse address at checkout in any store',
@@ -115,7 +118,7 @@ const I18N = {
     sv3t: 'Photos & inspection', sv3d: 'We show the contents and check against your order.',
     sv4t: 'Courier & lockers', sv4d: 'Pick up at a point, a 24/7 locker or get courier delivery.',
     stores_title: 'Popular stores', stores_all: 'Full catalog →',
-    tariffs_title: 'Shipping rates', tariffs_sub: 'A fair price per kg with no hidden fees. Ship more — pay less.',
+    tariffs_title: 'Shipping rates', tariffs_sub: 'A fair price per kg with no hidden fees. Calculate your parcel below.',
     app_title: 'The app is always at hand', app_sub: 'Install the web app on your phone right from the site — no App Store or Google Play needed.',
     app_install: 'Install app',
     faq_title: 'FAQ',
@@ -125,8 +128,8 @@ const I18N = {
     track_title: 'Track a parcel', track_ph: 'Tracking or parcel number', track_btn: 'Find',
     stores_page: 'Store catalog', search: 'Search', all_countries: 'All countries', all_categories: 'All categories',
     help_title: 'Help',
-    c_dashboard: 'Home', c_parcels: 'Parcels', c_addresses: 'My addresses', c_buyout: 'Buy for me', c_wallet: 'Wallet',
-    c_delivery: 'Delivery', c_loyalty: 'Rewards', c_support: 'Support', c_settings: 'Settings', c_more: 'More',
+    c_dashboard: 'Home', c_parcels: 'Parcels', c_addresses: 'My addresses', c_buyout: 'Buy for me',
+    c_delivery: 'Delivery', c_support: 'Support', c_settings: 'Settings', c_more: 'More',
   },
 };
 let LANG = (() => { try { return localStorage.getItem('qazbox-lang') || 'ru'; } catch { return 'ru'; } })();
@@ -178,33 +181,85 @@ function notify(clientId, text, silent = false) {
     try { new Notification('Way', { body: text, icon: 'icons/icon.svg' }); } catch {}
   }
 }
-function addTx(clientId, type, amount, note, method) {
-  const c = clientById(clientId);
-  c.balance = Math.round((c.balance + amount) * 100) / 100;
-  DB.transactions.unshift({ id: nextId('TX-', 'tx'), clientId, type, amount: Math.round(amount * 100) / 100, date: new Date().toISOString(), note, method });
+function recordPayment(clientId, amount, note, method) {
+  DB.payments.unshift({ id: nextId('PAY-', 'pay'), clientId, amount: Math.round(amount * 100) / 100, date: new Date().toISOString(), note, method });
+}
+
+/* ---------- Онлайн-оплата (эквайринг Kaspi Pay и банковских карт) ---------- */
+let PAY = null;
+/** Открывает оплату конкретной суммы. onPaid(method) вызывается после успешного платежа. */
+function payOnline({ amount, title, onPaid }) {
+  PAY = { amount, title, onPaid };
+  openModal('Оплата', `<div class="pay-sum"><div class="muted small">${esc(title)}</div><div class="v">${kzt(amount)}</div><div class="muted small">${usd(amount)} · курс 1 USD = ${DB.settings.rates.KZT} ₸</div></div>
+    <div class="pill-select mt"><label><input type="radio" name="pay-method" value="kaspi" checked><span><b style="color:#f14635">Kaspi Pay</b><br><span class="muted small">QR или переход в приложение Kaspi.kz</span></span></label>
+    <label><input type="radio" name="pay-method" value="card"><span><b>${ic('credit-card')} Банковская карта</b><br><span class="muted small">Visa, Mastercard · 3-D Secure</span></span></label></div>
+    <button class="btn accent block lg mt" data-action="pay-go">Оплатить ${kzt(amount)}</button>
+    <p class="muted small center mt-s">${ic('lock')} Платёж проходит на стороне банка — данные карты не сохраняются</p>`, { noFocus: true });
+}
+A['pay-go'] = () => {
+  const method = $('input[name=pay-method]:checked')?.value || 'kaspi';
+  if (method === 'kaspi') {
+    openModal('Оплата через Kaspi Pay', `<div class="center"><div style="display:inline-block;padding:14px;border:1px solid var(--border);border-radius:16px">${fakeQR()}</div>
+      <p class="mt">Отсканируйте QR в приложении <b>Kaspi.kz</b><br>Сумма: <b>${kzt(PAY.amount)}</b></p><p class="muted small">Тестовый режим эквайринга — платёж подтвердится автоматически</p>
+      <div class="row" style="justify-content:center"><span class="spinner"></span><span class="muted">Ожидаем оплату…</span></div></div>`, { noFocus: true });
+    setTimeout(() => finishPay('Kaspi Pay'), 2000);
+  } else {
+    openModal('Оплата картой', `<form data-form="pay-card"><div class="notice mb">${ic('flask-conical')} Тестовый режим: тестовая карта 4242 4242 4242 4242</div>
+      <label class="field"><span>Номер карты</span><input name="pan" value="4242 4242 4242 4242" class="mono"></label>
+      <div class="inline-inputs"><label class="field"><span>Срок</span><input value="12/29" class="mono"></label><label class="field"><span>CVC</span><input value="123" class="mono" type="password"></label></div>
+      <button class="btn block lg">Оплатить ${kzt(PAY.amount)}</button></form>`);
+  }
+};
+F['pay-card'] = d => {
+  openModal('3-D Secure', `<div class="center"><p>Подтверждение платежа в банке…</p><span class="spinner"></span></div>`, { noFocus: true });
+  setTimeout(() => finishPay('Visa •• ' + d.pan.replace(/\s/g, '').slice(-4)), 1500);
+};
+function finishPay(method) {
+  if (!PAY) return;
+  const p = PAY; PAY = null;
+  recordPayment(DB.session.clientId, p.amount, p.title, method);
+  closeModal();
+  p.onPaid(method);
+  Store.save(); render();
+  toast(`Оплачено ${kzt(p.amount)} (${esc(method)})`, 'ok');
+}
+function fakeQR() {
+  let s = '', seed = 7;
+  for (let y = 0; y < 21; y++) for (let x = 0; x < 21; x++) {
+    seed = (seed * 9301 + 49297) % 233280;
+    const finder = (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13);
+    const on = finder ? (x % 6 === 0 || y % 6 === 0 || (x % 20 > 1 && x % 20 < 5 && y % 20 > 1 && y % 20 < 5) || x === 20 || y === 20 || x === 14 || y === 14) && !((x > 6 && x < 14) || (y > 6 && y < 14)) : seed / 233280 > .5;
+    if (on) s += `<rect x="${x * 8}" y="${y * 8}" width="8" height="8"/>`;
+  }
+  return `<svg width="168" height="168" viewBox="0 0 168 168" fill="#111">${s}</svg>`;
 }
 
 /* ---------- Бизнес-расчёты ---------- */
-function calcShipping(countryCode, weight, dims, levelId = 'base') {
+function calcShipping(countryCode, weight, dims) {
   const c = countryBy(countryCode);
   if (!c) return null;
   const vol = dims && dims.l && dims.w && dims.h ? (dims.l * dims.w * dims.h) / DB.settings.volumetricDivider : 0;
   // к оплате — больший из весов, округлённый вверх до 100 г
   const chargeable = Math.ceil(Math.max(+weight || 0, vol) * 10 - 1e-9) / 10;
-  const perKg = c.perKg[levelId] ?? c.perKg.base;
+  const perKg = c.perKg;
   const cost = Math.round(Math.max(c.minCharge, chargeable * perKg) * 100) / 100;
   return { vol: Math.round(vol * 100) / 100, chargeable, perKg, cost, min: c.minCharge, transit: c.transit };
 }
 function parcelCost(p) {
   if (p.cost != null && p.paid) return p.cost;
   if (!p.weight) return null;
-  return calcShipping(p.country, p.weight, p.dims, clientById(p.clientId)?.level).cost;
+  return calcShipping(p.country, p.weight, p.dims).cost;
 }
+/** Неоплаченные услуги склада по посылке — оплачиваются вместе с доставкой (возврат оплачивается сразу). */
+function serviceRequestsDue(p) {
+  return DB.serviceRequests.filter(s => !s.paid && s.type !== 'return' && (s.parcelIds.includes(p.id) || s.resultParcelId === p.id));
+}
+const serviceDue = p => serviceRequestsDue(p).reduce((sum, s) => sum + s.price, 0);
+const parcelTotalDue = p => (parcelCost(p) || 0) + deliveryExtra(p) + serviceDue(p);
 function deliveryExtra(p) {
   if (p.delivery?.method !== 'courier') return 0;
   return (parcelCost(p) || 0) >= DB.settings.freeCourierFrom ? 0 : DB.settings.courierPrice;
 }
-function levelForKg(kgTotal) { return [...DB.levels].reverse().find(l => kgTotal >= l.fromKg) || DB.levels[0]; }
 function setParcelStatus(p, status, note = '') {
   p.status = status;
   p.history.unshift({ status, date: new Date().toISOString(), note });

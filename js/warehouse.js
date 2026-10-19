@@ -126,9 +126,8 @@ A['rx-ocr'] = () => OCR.open(info => {
 });
 CH['rx-field'] = el => {
   RX[el.dataset.k] = el.value;
-  const c = clientById(RX.clientId);
   if (RX.weight) {
-    const r = calcShipping(whc(), +RX.weight, { l: +RX.l, w: +RX.w, h: +RX.h }, c?.level);
+    const r = calcShipping(whc(), +RX.weight, { l: +RX.l, w: +RX.w, h: +RX.h });
     $('#rx-calc').textContent = `Объёмный: ${r.vol} кг · к оплате ${r.chargeable} кг · ${usd(r.cost)}`;
   }
 };
@@ -149,11 +148,10 @@ A['rx-accept'] = () => {
   if (c) {
     p.clientId = c.id;
     setParcelStatus(p, 'received', `Принята на склад ${countryBy(whc()).name}. ${RX.source}`);
-    // запланированные при добавлении услуги — создаём заявки
+    // запланированные при добавлении услуги — создаём заявки, оплата вместе с доставкой
     p.services.filter(s => s.status === 'planned').forEach(s => {
       const sv = SERVICES[s.type];
-      addTx(c.id, 'charge', -sv.price, `Услуга «${sv.name}» (${p.id})`);
-      const sr = { id: nextId('SR-', 'sr'), clientId: c.id, parcelIds: [p.id], type: s.type, status: 'new', createdAt: new Date().toISOString(), price: sv.price, comment: 'Заказано при добавлении посылки' };
+      const sr = { id: nextId('SR-', 'sr'), clientId: c.id, parcelIds: [p.id], type: s.type, status: 'new', createdAt: new Date().toISOString(), price: sv.price, comment: 'Заказано при добавлении посылки', paid: false };
       DB.serviceRequests.unshift(sr); s.status = 'new'; s.srId = sr.id;
     });
     // связь с выкупом
@@ -271,7 +269,8 @@ F['task-do'] = async (d, form) => {
     setParcelStatus(np, 'received', `Объединены: ${ps.map(p => p.id).join(', ')}`);
     ps.forEach(p => { p.mergedInto = np.id; p.cell = null; setParcelStatus(p, 'merged', 'Объединена в ' + np.id); });
     DB.parcels.unshift(np);
-    const before = ps.reduce((a, p) => a + calcShipping(p.country, p.weight, p.dims, c.level).cost, 0);
+    s.resultParcelId = np.id; // стоимость консолидации оплачивается вместе с доставкой новой посылки
+    const before = ps.reduce((a, p) => a + calcShipping(p.country, p.weight, p.dims).cost, 0);
     const after = parcelCost(np);
     notify(c.id, `Посылки объединены в ${np.id}: ${kg(np.weight)}, доставка ${usd(after)}${after < before ? ` вместо ${usd(before)} — экономия ${usd(before - after)}` : ''}`);
   } else if (s.type === 'photo') {
@@ -386,11 +385,7 @@ F['issue-do'] = d => {
   if (d.code.trim() !== p.id.slice(-4) + c.id.slice(-2)) return toast('Неверный код', 'err');
   setParcelStatus(p, 'delivered', 'Выдана в пункте ' + (pointById(p.delivery?.pointId)?.address || ''));
   p.cell = null;
-  const oldLvl = c.level;
-  c.shippedKg = Math.round((c.shippedKg + p.weight) * 10) / 10;
-  c.level = levelForKg(c.shippedKg).id;
   notify(c.id, `Посылка ${p.id} получена. Спасибо, что выбираете Way! Оцените сервис`, true);
-  if (c.level !== oldLvl) notify(c.id, `Новый уровень лояльности: ${levelOf(c).name}!`);
   logAction('warehouse', `Выдана посылка ${p.id} клиенту ${c.id}`);
   Store.save(); closeModal(); render(); toast(`${ic('circle-check')} Посылка выдана`, 'ok');
 };
